@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <title>Khalifa OS</title>
+    <title>Khalifa Commander</title>
     
-    <!-- PWA Manifest Hack för Single File -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Khalifa OS","short_name":"K-OS","display":"standalone","start_url":".","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://api.iconify.design/ri:focus-3-line.svg?color=%23ff9800","sizes":"192x192","type":"image/svg+xml"}]}'>
-    <link rel="apple-touch-icon" href="https://api.iconify.design/ri:focus-3-line.svg?color=%23ff9800">
+    <!-- Ikoner -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg: #000000;
-            --card: #111111;
+            --bg: #050505;
+            --card: #121212;
+            --active-card: #1a0f0f;
             --text: #ffffff;
             --muted: #666;
             
@@ -23,420 +22,457 @@
             --p2: #ff9500; /* Orange */
             --p3: #007aff; /* Blå */
             --p46: #af52de; /* Lila */
-            
             --gold: #ffd60a; 
-            --gold-glow: rgba(255, 214, 10, 0.2);
             
-            --btn-bg: #222;
+            --nav-height: 70px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
-            padding-top: 180px; /* Plats för Header */
-            padding-bottom: 100px;
-            overscroll-behavior-y: none; /* Stoppa studsig scroll */
+            padding: 0;
+            padding-top: 130px; /* Header space */
+            padding-bottom: var(--nav-height); /* Nav space */
+            user-select: none;
         }
 
-        /* --- HEADER & RINGAR --- */
+        /* --- HEADER & RINGS --- */
         .fixed-header {
             position: fixed; top: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 15px 20px; z-index: 100;
+            background: rgba(5,5,5,0.95); backdrop-filter: blur(10px);
+            padding: 10px 20px; z-index: 100;
             border-bottom: 1px solid #222;
-            display: grid; grid-template-columns: 1fr auto; align-items: center;
-        }
-
-        .header-left h1 { margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
-        .header-left p { margin: 0; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-
-        .rings-container { display: flex; gap: 15px; }
-        
-        /* Cirkel Mätare CSS */
-        .ring-wrapper { position: relative; width: 60px; height: 60px; }
-        .ring-svg { transform: rotate(-90deg); width: 60px; height: 60px; }
-        .ring-bg { fill: none; stroke: #222; stroke-width: 6; }
-        .ring-progress { fill: none; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 150; stroke-dashoffset: 150; transition: stroke-dashoffset 1s ease; }
-        .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; }
-        .ring-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: #888; white-space: nowrap; }
-
-        /* --- JOKER BOX --- */
-        .joker-box {
-            background: linear-gradient(145deg, #1a0b1f 0%, #0a0a0a 100%);
-            border: 1px solid #331144;
-            border-radius: 16px; padding: 20px; text-align: center;
-            margin-bottom: 30px; position: relative; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .joker-badge { background: #331144; color: #d0aaff; font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-        .joker-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; line-height: 1.2; }
-        .joker-btns { display: flex; gap: 10px; justify-content: center; }
-        
-        /* --- KNAPPAR (Generella) --- */
-        .btn {
-            border: none; padding: 10px 20px; border-radius: 12px;
-            font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: transform 0.1s;
-            display: flex; align-items: center; gap: 6px; justify-content: center;
-        }
-        .btn:active { transform: scale(0.96); }
-        .btn-outline { background: transparent; border: 1px solid #333; color: #aaa; }
-        .btn-timer { background: #222; color: var(--p2); border: 1px solid #332200; }
-
-        /* --- ZONER & LISTOR --- */
-        .zone-title {
-            margin-top: 30px; margin-bottom: 10px; padding: 0 5px;
             display: flex; justify-content: space-between; align-items: center;
-            font-size: 1rem; font-weight: 700; color: #888;
+            height: 120px;
         }
-        .zone-badge { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+
+        .header-info h1 { margin: 0; font-size: 2rem; font-weight: 800; }
+        .header-info p { margin: 0; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+
+        .rings-wrapper { display: flex; gap: 15px; }
+        .ring-container { position: relative; width: 60px; height: 60px; text-align: center; }
+        .ring-svg { transform: rotate(-90deg); width: 60px; height: 60px; }
+        .ring-bg { fill: none; stroke: #222; stroke-width: 5; }
+        .ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 150; stroke-dashoffset: 150; transition: stroke-dashoffset 1s ease; }
+        .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; }
+        .ring-label { font-size: 0.6rem; color: #666; margin-top: -5px; display: block; }
+
+        /* --- TABS NAVIGATION --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: var(--nav-height);
+            background: #111; border-top: 1px solid #222;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100;
+        }
         
-        /* --- KORT DESIGN (Tum-vänlig) --- */
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #555; font-size: 0.7rem; width: 100%; height: 100%;
+            cursor: pointer; transition: color 0.2s;
+        }
+        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+        .nav-item.active { color: var(--gold); background: #1a1a1a; }
+
+        /* --- VIEWS --- */
+        .view-section { display: none; padding: 15px; }
+        .view-section.active { display: block; animation: fadeIn 0.3s; }
+
+        /* --- TASK CARDS (TODAY) --- */
+        .zone-title {
+            margin-top: 25px; margin-bottom: 10px; 
+            font-size: 0.9rem; font-weight: 700; color: #888; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
         .task-card {
-            background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px;
-            border: 1px solid #1a1a1a; transition: all 0.3s ease; position: relative; overflow: hidden;
+            background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 10px;
+            border: 1px solid #1f1f1f; display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s;
         }
+
+        /* ACTIVE STATE (Recording) */
+        .task-card.recording {
+            background: #2a1010; border-color: var(--p1);
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { border-color: var(--p1); } 50% { border-color: #500; } 100% { border-color: var(--p1); } }
+
+        /* DONE STATE (Target Met) */
+        .task-card.done { border-color: var(--gold); }
+        .task-card.done .task-title { color: var(--gold); }
+
+        .task-left { flex-grow: 1; }
+        .task-title { font-size: 1rem; font-weight: 600; display: block; }
+        .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
         
-        /* Guld Status */
-        .task-card.gold {
-            background: linear-gradient(145deg, #1f1c05 0%, #000 100%);
-            border: 1px solid var(--gold);
-            box-shadow: 0 0 15px rgba(255, 214, 10, 0.1);
-        }
-        .task-card.gold .task-title { color: var(--gold); }
+        .task-right { display: flex; align-items: center; gap: 15px; }
+        .time-badge { font-family: monospace; font-size: 0.9rem; background: #000; padding: 4px 8px; border-radius: 4px; color: #aaa; }
         
-        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .task-title { font-size: 1.1rem; font-weight: 600; display: block; margin-bottom: 4px; }
-        .task-meta { font-size: 0.8rem; color: var(--muted); }
-        .task-current { font-family: monospace; font-size: 0.9rem; background: #000; padding: 4px 8px; border-radius: 6px; color: #fff; }
-
-        /* ACTION BAR (Knappar underst) */
-        .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .action-btn {
-            background: var(--btn-bg); color: #fff; border: none;
-            padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1rem;
-            position: relative; overflow: hidden;
+        /* PLAY BUTTON */
+        .btn-play {
+            width: 45px; height: 45px; border-radius: 50%; border: none;
+            background: #222; color: #fff; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s, background 0.2s;
         }
-        /* Ripple effect fix */
-        .action-btn::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.05); opacity:0; transition: opacity 0.2s;}
-        .action-btn:active::after { opacity: 1; }
-        .action-btn:active { transform: scale(0.98); background: #333; }
+        .btn-play:active { transform: scale(0.9); }
+        
+        .recording .btn-play { background: var(--p1); color: white; animation: rotateIcon 0s; }
+        .recording .time-badge { color: white; }
 
-        /* Extra List */
-        .extra-list { display: none; }
-        .extra-list.open { display: block; animation: slideDown 0.3s ease; }
+        /* --- STATS VIEWS (WEEK/MONTH) --- */
+        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .stat-bar-bg { height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 4px; }
+        
+        .total-summary { text-align: center; margin-bottom: 20px; }
+        .big-number { font-size: 2.5rem; font-weight: 800; color: var(--text); }
+        .big-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
 
-        /* Timer Modal */
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index: 2000; backdrop-filter: blur(10px); align-items: center; justify-content: center; flex-direction: column; }
-        .timer-display { font-size: 5rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 40px; }
-        .modal.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Konfetti Canvas */
-        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
-
-        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
     </style>
 </head>
 <body>
 
-    <canvas id="confetti"></canvas>
-
     <!-- HEADER -->
     <div class="fixed-header">
-        <div class="header-left">
+        <div class="header-info">
             <h1 id="clock">07:00</h1>
-            <p>Khalifa OS</p>
+            <p>COMMANDER V6</p>
         </div>
-        
-        <div class="rings-container">
-            <!-- Ring 1: Dagen (Tid) -->
-            <div class="ring-wrapper">
+        <div class="rings-wrapper">
+            <!-- Ring 1: Dagen -->
+            <div class="ring-container">
                 <svg class="ring-svg" viewBox="0 0 60 60">
                     <circle class="ring-bg" cx="30" cy="30" r="24"></circle>
-                    <circle id="ring-day" class="ring-progress" cx="30" cy="30" r="24" stroke="#ff3b30"></circle>
+                    <circle id="ring-day" class="ring-fill" cx="30" cy="30" r="24" stroke="#666"></circle>
                 </svg>
                 <div class="ring-icon">🌅</div>
                 <div class="ring-label">17h</div>
             </div>
-            
-            <!-- Ring 2: Insats (Jobb) -->
-            <div class="ring-wrapper" onclick="openTimer()">
+            <!-- Ring 2: Budget (Prio 1/2) -->
+            <div class="ring-container">
                 <svg class="ring-svg" viewBox="0 0 60 60">
                     <circle class="ring-bg" cx="30" cy="30" r="24"></circle>
-                    <circle id="ring-work" class="ring-progress" cx="30" cy="30" r="24" stroke="#007aff"></circle>
+                    <circle id="ring-budget" class="ring-fill" cx="30" cy="30" r="24" stroke="#ff3b30"></circle>
                 </svg>
-                <div class="ring-icon">⚡</div>
-                <div class="ring-label">Mål</div>
+                <div class="ring-icon">🎯</div>
+                <div class="ring-label">Prio</div>
             </div>
         </div>
     </div>
 
-    <!-- JOKER -->
-    <div class="joker-box">
-        <span class="joker-badge">Dagens Fokus (Prio 4-6)</span>
-        <div class="joker-title" id="joker-text">Laddar...</div>
-        <div class="joker-btns">
-            <button class="btn btn-outline" onclick="rollJoker(); vibrate(20);">🎲 Byt</button>
-            <button class="btn btn-outline" onclick="toggleExtra(); vibrate(20);">📂 Alla</button>
+    <!-- VIEW: IDAG -->
+    <div id="view-today" class="view-section active">
+        <div id="project-list"></div>
+        <div style="height: 50px;"></div> <!-- Spacing -->
+    </div>
+
+    <!-- VIEW: VECKA -->
+    <div id="view-week" class="view-section">
+        <div class="total-summary">
+            <div class="big-label">Senaste 7 Dagar</div>
+            <div class="big-number" id="week-total">0h</div>
         </div>
-        <div id="extra-list" class="extra-list"></div>
+        <div id="week-breakdown"></div>
     </div>
 
-    <!-- LISTOR -->
-    <div id="main-content">
-        <!-- Renderas med JS -->
-    </div>
-
-    <!-- FOOTER -->
-    <div style="text-align: center; margin-top: 50px; opacity: 0.5;">
-        <button class="btn btn-outline" onclick="exportData()" style="font-size: 0.7rem;">💾 Spara Backup</button>
-        <p style="font-size: 0.7rem; margin-top:10px;">V5.0 - Ultimate</p>
-    </div>
-
-    <!-- TIMER MODAL -->
-    <div id="timer-modal" class="modal">
-        <div style="color:#666; letter-spacing: 2px; margin-bottom: 20px;">FOKUS LÄGE</div>
-        <div id="timer-val" class="timer-display">00:00</div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%; max-width: 300px;">
-            <button class="action-btn" onclick="startTimer(15)">15m</button>
-            <button class="action-btn" onclick="startTimer(30)">30m</button>
-            <button class="action-btn" onclick="startTimer(45)">45m</button>
-            <button class="action-btn" onclick="startTimer(60)">60m</button>
+    <!-- VIEW: MÅNAD -->
+    <div id="view-month" class="view-section">
+        <div class="total-summary">
+            <div class="big-label">Senaste 30 Dagar</div>
+            <div class="big-number" id="month-total">0h</div>
         </div>
-        <button class="btn btn-outline" style="margin-top: 30px; border-color: #ff3b30; color: #ff3b30;" onclick="closeTimer()">Avbryt</button>
+        <div id="month-breakdown"></div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('today', this)">
+            <i class="fas fa-calendar-day"></i>
+            <span>IDAG</span>
+        </div>
+        <div class="nav-item" onclick="switchView('week', this)">
+            <i class="fas fa-chart-bar"></i>
+            <span>VECKA</span>
+        </div>
+        <div class="nav-item" onclick="switchView('month', this)">
+            <i class="fas fa-calendar-alt"></i>
+            <span>MÅNAD</span>
+        </div>
     </div>
 
 <script>
-    // --- INSTÄLLNINGAR ---
-    const WAKE_TIME = 7;
-    const SLEEP_TIME = 24;
-    const WORK_GOAL_MINS = 840; // 14 timmar
+    // --- KONFIG ---
+    const WAKE_TIME = 7; 
+    const SLEEP_TIME = 24; 
 
-    // --- PROJEKT DATA ---
+    // --- PROJEKT LISTA (ALLT SYNLIGT) ---
     const projects = [
-        { id: 'yt_long', title: 'YouTube Lång', meta: 'Batch-inspelning / Planering', prio: 1, target: 120 },
-        { id: 'yt_short', title: 'YouTube Kort', meta: 'Shorts / Reels / Klipp', prio: 1, target: 60 },
-        { id: 'social', title: 'Social Media', meta: 'Community / Svar', prio: 2, target: 45 },
-        { id: 'fam_act', title: 'Familj & Lek', meta: 'Aktivitet / Utflykt', prio: 2, target: 60 },
-        { id: 'azzah', title: 'Azzah Tid', meta: 'Relation / Stöd', prio: 2, target: 60 },
-        { id: 'kids', title: 'Barn 1-mot-1', meta: 'Fokus tid', prio: 2, target: 30 },
-        { id: 'health', title: 'Hälsa', meta: 'Promenad / Vila', prio: 2, target: 45 },
-        { id: 'prayer', title: 'Bön & Adhkar', meta: 'Andlighet', prio: 3, target: 30 },
-        { id: 'meals', title: 'Mat & Hus', meta: 'Drift / Matlagning', prio: 3, target: 45 },
-        { id: 'autobio', title: 'Självbiografi', meta: 'Skrivande', prio: 3, target: 15 },
-        { id: 'learning', title: 'Lärande', meta: 'Lyssna / Läsa', prio: 3, target: 30 },
-        // Prio 4-6
-        { id: 'thriller', title: 'Bok: Deckare', meta: 'Veckovis', prio: 4, target: 30 },
-        { id: 'biz', title: 'Business/Merch', meta: 'Veckovis', prio: 4, target: 30 },
-        { id: 'prep', title: 'Meal Prep', meta: 'Veckovis', prio: 4, target: 60 },
-        { id: 'coach', title: 'Coaching', meta: 'Varannan', prio: 5, target: 30 },
-        { id: 'strategy', title: 'Strategi', meta: 'Månadsvis', prio: 6, target: 30 },
-        { id: 'ai', title: 'AI & Tech', meta: 'Månadsvis', prio: 6, target: 30 }
+        { id: 'yt_long', title: 'YouTube Lång', prio: 1, target: 120 },
+        { id: 'yt_short', title: 'YouTube Kort', prio: 1, target: 60 },
+        
+        { id: 'social', title: 'Social Media', prio: 2, target: 45 },
+        { id: 'fam_act', title: 'Familj & Lek', prio: 2, target: 60 },
+        { id: 'azzah', title: 'Azzah Tid', prio: 2, target: 60 },
+        { id: 'kids', title: 'Barn 1-mot-1', prio: 2, target: 30 },
+        { id: 'health', title: 'Hälsa', prio: 2, target: 45 },
+
+        { id: 'prayer', title: 'Bön & Adhkar', prio: 3, target: 30 },
+        { id: 'meals', title: 'Mat & Hus', prio: 3, target: 45 },
+        { id: 'learning', title: 'Lärande', prio: 3, target: 30 },
+
+        { id: 'thriller', title: 'Bok: Deckare', prio: 4, target: 30 },
+        { id: 'biz', title: 'Business/Merch', prio: 4, target: 30 },
+        { id: 'prep', title: 'Meal Prep', prio: 4, target: 60 },
+        
+        { id: 'coach', title: 'Coaching', prio: 5, target: 30 },
+        
+        { id: 'strategy', title: 'Strategi', prio: 6, target: 30 },
+        { id: 'ai', title: 'AI & Tech', prio: 6, target: 30 }
     ];
 
-    // --- SYSTEM LOGIK ---
-    let progress = JSON.parse(localStorage.getItem('khalifa_v5')) || {};
+    // --- DATA STORE ---
+    // history = { "YYYY-MM-DD": { "yt_long": 60, "social": 15 } }
+    let history = JSON.parse(localStorage.getItem('khalifa_history')) || {};
     
-    // Auto Reset
-    const today = new Date().toDateString();
-    if(localStorage.getItem('khalifa_date') !== today) {
-        progress = {};
-        localStorage.setItem('khalifa_date', today);
-        localStorage.setItem('khalifa_v5', JSON.stringify(progress));
+    // activeTask = { id: 'yt_long', start: 17023123123 } eller null
+    let activeTask = JSON.parse(localStorage.getItem('khalifa_active')) || null;
+
+    // --- DAGENS DATA ---
+    function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+    function getTodayData() { 
+        const d = getTodayStr();
+        if(!history[d]) history[d] = {};
+        return history[d];
+    }
+    function save() {
+        localStorage.setItem('khalifa_history', JSON.stringify(history));
+        localStorage.setItem('khalifa_active', JSON.stringify(activeTask));
     }
 
-    function render() {
+    // --- RENDER TODAY ---
+    function renderToday() {
+        const todayData = getTodayData();
+        const list = document.getElementById('project-list');
+        list.innerHTML = '';
+
         const zones = {
-            1: { color: 'var(--p1)', title: '🔴 PRIO 1: TUNG', html: '' },
-            2: { color: 'var(--p2)', title: '🟠 PRIO 2: BALANS', html: '' },
-            3: { color: 'var(--p3)', title: '🔵 PRIO 3: GRUND', html: '' },
-            4: { color: 'var(--p46)', title: 'EXTRA', html: '' }
+            1: { color: 'var(--p1)', title: 'PRIO 1: TUNG', html: '' },
+            2: { color: 'var(--p2)', title: 'PRIO 2: BALANS', html: '' },
+            3: { color: 'var(--p3)', title: 'PRIO 3: GRUND', html: '' },
+            4: { color: 'var(--p46)', title: 'PRIO 4-6: UTVECKLING', html: '' }
         };
 
-        const extraHtml = [];
-        let totalMins = 0;
-
         projects.forEach(p => {
-            const cur = progress[p.id] || 0;
-            totalMins += cur;
-            const isGold = cur >= p.target;
+            const mins = todayData[p.id] || 0;
+            const isTargetMet = mins >= p.target;
+            const isActive = activeTask && activeTask.id === p.id;
             
-            const card = `
-                <div class="task-card ${isGold ? 'gold' : ''}">
-                    <div class="task-header">
-                        <div>
-                            <span class="task-title">${p.title}</span>
-                            <span class="task-meta">${p.meta} ${isGold ? '⭐ KLAR' : ''}</span>
-                        </div>
-                        <span class="task-current">${formatTime(cur)}</span>
+            // Hantera "Gjord" checkmark
+            let checkIcon = isTargetMet ? '<i class="fas fa-check-circle" style="color:var(--gold)"></i>' : '';
+            
+            // Knapp Ikon
+            let btnIcon = isActive ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-play"></i>';
+            let cardClass = isActive ? 'task-card recording' : (isTargetMet ? 'task-card done' : 'task-card');
+
+            // Om aktiv, visa räknande tid
+            let displayTime = formatTime(mins);
+            if(isActive) displayTime = "REC..."; 
+
+            const html = `
+                <div class="${cardClass}">
+                    <div class="task-left">
+                        <span class="task-title">${p.title} ${checkIcon}</span>
+                        <span class="task-meta">Mål: ${p.target}m</span>
                     </div>
-                    <div class="action-bar">
-                        <button class="action-btn" onclick="addTime('${p.id}', 15)">+15 min</button>
-                        <button class="action-btn" onclick="addTime('${p.id}', 30)">+30 min</button>
+                    <div class="task-right">
+                        <span class="time-badge">${displayTime}</span>
+                        <button class="btn-play" onclick="toggleTask('${p.id}')">${btnIcon}</button>
                     </div>
                 </div>
             `;
 
-            if(p.prio <= 3) zones[p.prio].html += card;
-            else extraHtml.push(card);
+            let z = p.prio > 3 ? 4 : p.prio;
+            zones[z].html += html;
         });
 
-        // Bygg Main Content
-        const main = document.getElementById('main-content');
-        main.innerHTML = '';
-        
-        [1, 2, 3].forEach(z => {
-            main.innerHTML += `
+        // Rita ut zoner
+        for(let z=1; z<=4; z++) {
+            list.innerHTML += `
                 <div class="zone-title">
-                    <span><span class="zone-badge" style="background:${zones[z].color}"></span>${zones[z].title}</span>
+                    <div class="dot" style="background:${zones[z].color}"></div>
+                    ${zones[z].title}
                 </div>
                 ${zones[z].html}
             `;
+        }
+
+        updateRings();
+    }
+
+    // --- TIMER LOGIK (START/STOPP) ---
+    function toggleTask(id) {
+        vibrate(20);
+        const now = Date.now();
+
+        if (activeTask && activeTask.id === id) {
+            // STOPPA
+            const duration = Math.floor((now - activeTask.start) / 60000); // minuter
+            if (duration > 0) {
+                const d = getTodayStr();
+                if (!history[d]) history[d] = {};
+                if (!history[d][id]) history[d][id] = 0;
+                history[d][id] += duration;
+            }
+            activeTask = null;
+        } else {
+            // OM ANNAN AKTIV -> STOPPA DEN FÖRST
+            if (activeTask) {
+                const prevId = activeTask.id;
+                const duration = Math.floor((now - activeTask.start) / 60000);
+                if (duration > 0) {
+                    const d = getTodayStr();
+                    if (!history[d]) history[d] = {};
+                    if (!history[d][prevId]) history[d][prevId] = 0;
+                    history[d][prevId] += duration;
+                }
+            }
+            // STARTA NY
+            activeTask = { id: id, start: now };
+        }
+        save();
+        renderToday();
+    }
+
+    // --- RENDER STATS (VECKA/MÅNAD) ---
+    function renderStats(days, containerId, totalId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        let totalMins = 0;
+        let categoryMins = { 1:0, 2:0, 3:0, 4:0 }; // Prio buckets
+        
+        // Loopa bakåt X dagar
+        for(let i=0; i<days; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0];
+            const dayData = history[dateStr] || {};
+            
+            projects.forEach(p => {
+                if(dayData[p.id]) {
+                    const m = dayData[p.id];
+                    totalMins += m;
+                    let z = p.prio > 3 ? 4 : p.prio;
+                    categoryMins[z] += m;
+                }
+            });
+        }
+
+        document.getElementById(totalId).innerText = (totalMins/60).toFixed(1) + "h";
+
+        // Rita bars för kategorier
+        const cats = [
+            { id:1, label:'Prio 1 (Tung)', color:'var(--p1)' },
+            { id:2, label:'Prio 2 (Balans)', color:'var(--p2)' },
+            { id:3, label:'Prio 3 (Grund)', color:'var(--p3)' },
+            { id:4, label:'Prio 4-6 (Framtid)', color:'var(--p46)' }
+        ];
+
+        cats.forEach(c => {
+            const val = categoryMins[c.id];
+            const pct = totalMins > 0 ? (val / totalMins) * 100 : 0;
+            const html = `
+                <div class="stat-card">
+                    <div class="stat-row">
+                        <span style="color:${c.color}; font-weight:bold;">${c.label}</span>
+                        <span>${formatTime(val)}</span>
+                    </div>
+                    <div class="stat-bar-bg">
+                        <div class="stat-bar-fill" style="width:${pct}%; background:${c.color}"></div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+
+    // --- RINGS ---
+    function updateRings() {
+        // Ring 1: Tid (17h)
+        const now = new Date();
+        const h = now.getHours() + now.getMinutes()/60;
+        const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
+        setRing('ring-day', dayPct, '#666');
+
+        // Ring 2: Budget (Bara Prio 1 & 2 räknas!)
+        const todayData = getTodayData();
+        let totalGoal = 0;
+        let totalDone = 0;
+        
+        projects.filter(p => p.prio <= 2).forEach(p => {
+            totalGoal += p.target;
+            totalDone += Math.min(p.target, (todayData[p.id] || 0)); // Cap at target for percentage
         });
         
-        document.getElementById('extra-list').innerHTML = extraHtml.join('');
-        updateRings(totalMins);
+        const budgetPct = totalGoal > 0 ? totalDone / totalGoal : 0;
+        const color = budgetPct >= 1 ? 'var(--gold)' : 'var(--p1)';
+        setRing('ring-budget', budgetPct, color);
     }
 
-    function addTime(id, min) {
-        vibrate(15); // Haptisk
-        if(!progress[id]) progress[id] = 0;
-        
-        const oldVal = progress[id];
-        progress[id] += min;
-        
-        // Check Gold Trigger
-        const p = projects.find(x => x.id === id);
-        if(oldVal < p.target && progress[id] >= p.target) {
-            triggerConfetti();
-            vibrate([50, 50, 50]); // Success vibration
-        }
-        
-        localStorage.setItem('khalifa_v5', JSON.stringify(progress));
-        render();
-    }
-
-    // --- RINGS LOGIK (SVG MATH) ---
-    function updateRings(totalMins) {
-        // Dag Ring
-        const now = new Date();
-        const hour = now.getHours() + now.getMinutes()/60;
-        const dayPct = Math.max(0, Math.min(1, (hour - WAKE_TIME) / (SLEEP_TIME - WAKE_TIME)));
-        setRing('ring-day', dayPct);
-
-        // Work Ring
-        const workPct = Math.min(1, totalMins / WORK_GOAL_MINS);
-        setRing('ring-work', workPct);
-    }
-
-    function setRing(id, pct) {
+    function setRing(id, pct, color) {
         const circle = document.getElementById(id);
-        const radius = circle.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
-        const offset = circumference - (pct * circumference);
+        const r = circle.r.baseVal.value;
+        const c = r * 2 * Math.PI;
+        const offset = c - (pct * c);
         circle.style.strokeDashoffset = offset;
-        
-        // Färgändring vid 100%
-        if(pct >= 1) circle.style.stroke = "var(--gold)";
-    }
-
-    // --- JOKER ---
-    function rollJoker() {
-        const extras = projects.filter(p => p.prio >= 4);
-        const rand = extras[Math.floor(Math.random() * extras.length)];
-        document.getElementById('joker-text').innerText = rand.title;
-    }
-    function toggleExtra() { 
-        document.getElementById('extra-list').classList.toggle('open'); 
+        circle.style.stroke = color;
     }
 
     // --- UTILS ---
-    function vibrate(pattern) {
-        if(navigator.vibrate) navigator.vibrate(pattern);
+    function switchView(viewName, btn) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-' + viewName).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+
+        if(viewName === 'week') renderStats(7, 'week-breakdown', 'week-total');
+        if(viewName === 'month') renderStats(30, 'month-breakdown', 'month-total');
+    }
+
+    function formatTime(m) {
+        if(m >= 60) return (m/60).toFixed(1) + 'h';
+        return m + 'm';
     }
     
-    function formatTime(m) {
-        return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm';
-    }
+    function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
     function updateClock() {
-        const now = new Date();
-        document.getElementById('clock').innerText = 
-            String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-        // Uppdatera ringar även om inget klickas
-        updateRings(Object.values(progress).reduce((a,b)=>a+b,0)); 
-    }
-
-    // --- TIMER ---
-    let timerInt;
-    function openTimer() { document.getElementById('timer-modal').classList.add('active'); }
-    function closeTimer() { document.getElementById('timer-modal').classList.remove('active'); clearInterval(timerInt); }
-    function startTimer(min) {
-        vibrate(20);
-        let sec = min * 60;
-        const disp = document.getElementById('timer-val');
-        if(timerInt) clearInterval(timerInt);
-        timerInt = setInterval(() => {
-            sec--;
-            let m = Math.floor(sec / 60);
-            let s = sec % 60;
-            disp.innerText = `${m}:${String(s).padStart(2,'0')}`;
-            if(sec <= 0) {
-                clearInterval(timerInt);
-                disp.innerText = "KLART!";
-                disp.style.color = "var(--gold)";
-                vibrate([200, 100, 200]);
-            }
-        }, 1000);
-    }
-
-    // --- KONFETTI (Mini-script) ---
-    function triggerConfetti() {
-        const canvas = document.getElementById('confetti');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const d = new Date();
+        document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         
-        let particles = [];
-        const colors = ['#ff3b30', '#ff9500', '#ffd60a', '#007aff', '#af52de'];
-        
-        for(let i=0; i<100; i++) {
-            particles.push({
-                x: canvas.width/2, y: canvas.height/2,
-                vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10 - 5,
-                color: colors[Math.floor(Math.random()*colors.length)],
-                size: Math.random()*5 + 2, life: 100
-            });
+        // Auto-update timer display visual only (logiken sker vid stopp)
+        if(activeTask) {
+            renderToday(); // Refresh UI to show "REC..." pulse
         }
-        
-        function animate() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            particles.forEach((p, index) => {
-                p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-                if(p.life <= 0) particles.splice(index, 1);
-            });
-            if(particles.length > 0) requestAnimationFrame(animate);
-        }
-        animate();
-    }
-
-    // --- EXPORT ---
-    function exportData() {
-        alert("Backup-kod (Kopiera): " + JSON.stringify(progress));
     }
 
     // INIT
-    setInterval(updateClock, 30000);
+    setInterval(updateClock, 30000); // 30 sek uppdatering
     updateClock();
-    rollJoker();
-    render();
+    renderToday();
 
 </script>
 </body>
