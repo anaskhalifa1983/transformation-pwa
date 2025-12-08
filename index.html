@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#000000">
-    <title>Khalifa Commander v7</title>
+    <meta name="theme-color" content="#050505">
+    <title>Khalifa Architect V8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -13,473 +13,648 @@
             --bg: #050505;
             --card-bg: #141414;
             --text: #fff;
+            --muted: #888;
             
-            /* WOW-GRADIENTS */
-            --p1-grad: linear-gradient(135deg, #ff3b30, #ff6b30);
-            --p2-grad: linear-gradient(135deg, #ff9500, #ffcc00);
-            --p3-grad: linear-gradient(135deg, #007aff, #00b4ff);
-            --p46-grad: linear-gradient(135deg, #5e5ce6, #bf5af2);
+            /* GRADIENTS */
+            --p1-grad: linear-gradient(135deg, #d32f2f, #ef5350);
+            --p2-grad: linear-gradient(135deg, #f57c00, #ffb74d);
+            --p3-grad: linear-gradient(135deg, #1976d2, #42a5f5);
+            --p46-grad: linear-gradient(135deg, #7b1fa2, #ba68c8);
             
-            --p1-glow: rgba(255, 59, 48, 0.3);
-            --gold: #ffd60a;
-            
+            --gold: #ffd700;
             --nav-height: 80px;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0; padding: 0;
-            padding-top: 180px; /* Plats för Header + Filter */
-            padding-bottom: 100px;
+            padding-top: 140px; 
+            padding-bottom: 120px;
             overscroll-behavior-y: none;
         }
 
-        /* --- HEADER & RINGS --- */
+        /* --- HEADER --- */
         .fixed-header {
             position: fixed; top: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
-            z-index: 100; border-bottom: 1px solid #222;
+            background: rgba(5,5,5,0.98); z-index: 100;
+            border-bottom: 1px solid #222;
         }
         
         .top-deck {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; height: 110px;
+            padding: 15px 20px; height: 90px;
         }
 
-        .clock-area h1 { margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
-        .clock-area p { margin: 0; font-size: 0.8rem; color: #666; text-transform: uppercase; font-weight: 700; }
+        .clock h1 { margin: 0; font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+        .clock p { margin: 0; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 2px; }
 
-        /* FILTER BAR (Sticky under header) */
+        /* FILTER TABS */
         .filter-bar {
-            display: flex; gap: 10px; padding: 10px 20px;
-            border-top: 1px solid #1a1a1a; overflow-x: auto;
+            display: flex; gap: 10px; padding: 0 20px 15px 20px;
+            overflow-x: auto;
         }
-        
         .filter-pill {
             background: #222; border: 1px solid #333; color: #888;
-            padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
-            white-space: nowrap; cursor: pointer; transition: all 0.2s;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            white-space: nowrap; transition: all 0.2s;
         }
-        .filter-pill.active { background: #fff; color: #000; border-color: #fff; }
+        .filter-pill.active { background: #fff; color: #000; }
 
-        /* RINGS */
-        .rings { display: flex; gap: 15px; }
-        .ring-box { position: relative; width: 55px; height: 55px; }
-        .ring-svg { transform: rotate(-90deg); width: 55px; height: 55px; }
-        .ring-bg { fill: none; stroke: #222; stroke-width: 5; }
-        .ring-val { fill: none; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 140; stroke-dashoffset: 140; transition: stroke-dashoffset 1s; }
-        .ring-icon { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.2rem;}
+        /* --- DASHBOARD SUMMARY CARD --- */
+        .summary-card {
+            background: linear-gradient(180deg, #1a1a1a, #111);
+            margin: 20px; padding: 15px; border-radius: 16px; border: 1px solid #2a2a2a;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+        }
+        .sum-item { text-align: center; }
+        .sum-val { font-size: 1.5rem; font-weight: 800; display: block; }
+        .sum-label { font-size: 0.7rem; color: #666; text-transform: uppercase; }
+        .progress-total { grid-column: span 2; background: #222; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+        .progress-fill-total { height: 100%; background: var(--gold); width: 0%; transition: width 0.5s; }
 
-        /* --- CARDS DESIGN --- */
+        /* --- TASK CARDS --- */
         .zone-label {
-            margin: 30px 20px 10px 20px; font-size: 0.8rem; font-weight: 800; 
+            margin: 30px 20px 10px 20px; font-size: 0.75rem; font-weight: 800; 
             color: #555; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
         }
         .zone-line { flex-grow: 1; height: 1px; background: #222; }
 
         .task-card {
-            background: var(--card-bg); margin: 0 20px 15px 20px; padding: 20px;
-            border-radius: 18px; border: 1px solid #222;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: transform 0.2s; position: relative; overflow: hidden;
+            background: var(--card-bg); margin: 0 20px 15px 20px; padding: 18px;
+            border-radius: 16px; border: 1px solid #222;
+            position: relative; overflow: hidden; transition: transform 0.1s;
         }
+        .task-card:active { transform: scale(0.98); }
 
-        /* PRIO 1 SPECIAL STYLE (HERO) */
+        /* PRIO 1 HERO */
         .prio-1 {
-            background: linear-gradient(145deg, #1a0505 0%, #0a0a0a 100%);
+            background: linear-gradient(145deg, #1e0a0a 0%, #0a0a0a 100%);
             border: 1px solid #4a1a1a;
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        .prio-1 .task-title { font-size: 1.2rem; font-weight: 800; }
-        .prio-1-border { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--p1-grad); }
-
-        /* PRIO 4-6 COMPACT STYLE */
-        .prio-low { padding: 15px 20px; opacity: 0.9; }
-        .prio-low .task-title { font-size: 0.9rem; }
-        .prio-low .btn-play { width: 45px; height: 45px; font-size: 1rem; }
+        .prio-1-mark { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--p1-grad); }
 
         /* STATES */
-        .task-card.recording {
-            border-color: #ff3b30; background: #220a0a;
-            box-shadow: 0 0 20px rgba(255, 59, 48, 0.15);
-            animation: breathe 2s infinite;
-        }
-        @keyframes breathe { 0% { border-color: #ff3b30; } 50% { border-color: #800; } 100% { border-color: #ff3b30; } }
+        .recording { border-color: #ef5350; background: #2a0e0e; }
+        .paused { border-color: #ffb74d; background: #2a1e0e; animation: pulseYellow 2s infinite; }
+        .done { border-color: rgba(255, 215, 0, 0.2); }
+        .done .task-title { color: var(--gold); }
 
-        .task-card.done .task-title { color: var(--gold); }
-        .task-card.done { border-color: rgba(255, 214, 10, 0.3); }
+        @keyframes pulseYellow { 0% { border-color: #ffb74d; } 50% { border-color: #664a1f; } 100% { border-color: #ffb74d; } }
 
-        /* TEXT & BUTTONS */
-        .task-info { flex-grow: 1; }
-        .task-title { font-size: 1rem; font-weight: 700; display: block; margin-bottom: 4px; }
-        .task-meta { font-size: 0.8rem; color: #666; }
+        /* CARD CONTENT */
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .task-title { font-size: 1rem; font-weight: 700; display: block; }
+        .task-meta { font-size: 0.75rem; color: #666; margin-top: 2px; display: flex; gap: 8px; }
         
-        .task-action { display: flex; align-items: center; gap: 15px; }
+        /* CONTROLS */
+        .control-group { display: flex; align-items: center; gap: 10px; }
         
-        /* LIVE TIMER BADGE */
         .timer-badge { 
-            font-family: monospace; font-size: 1rem; color: #888; 
-            background: #000; padding: 6px 10px; border-radius: 8px; min-width: 60px; text-align: center;
+            font-family: monospace; font-size: 0.9rem; color: #666; background: #000; 
+            padding: 6px 10px; border-radius: 6px; min-width: 65px; text-align: center; 
         }
-        .recording .timer-badge { color: #ff3b30; font-weight: bold; background: #2a0000; }
-        .done .timer-badge { color: var(--gold); }
+        .recording .timer-badge { color: #fff; background: #d32f2f; }
+        .paused .timer-badge { color: #000; background: #ffb74d; }
 
-        /* BIG PLAY BUTTON */
-        .btn-play {
-            width: 60px; height: 60px; border-radius: 50%; border: none;
-            background: #252525; color: #fff; font-size: 1.4rem;
+        .btn-main {
+            width: 50px; height: 50px; border-radius: 50%; border: none;
+            background: #252525; color: #fff; font-size: 1.2rem;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.1s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.2s;
         }
-        .btn-play:active { transform: scale(0.9); }
-        .recording .btn-play { background: var(--p1-grad); animation: spin 4s linear infinite; }
+        .btn-stop {
+            width: 35px; height: 35px; border-radius: 50%; border: none;
+            background: #222; color: #ef5350; font-size: 0.9rem;
+            display: none; align-items: center; justify-content: center;
+        }
+
+        /* Active State Controls */
+        .recording .btn-main { background: var(--p1-grad); }
+        .recording .btn-stop { display: flex; }
+        .paused .btn-main { background: #ffb74d; color: #000; animation: none; }
+        .paused .btn-stop { display: flex; }
+
+        /* Progress Bar inside Card */
+        .card-progress-bg { height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 10px; }
+        .card-progress-fill { height: 100%; background: #444; width: 0%; transition: width 0.3s; }
+        .prio-1 .card-progress-fill { background: var(--p1-grad); }
+        .done .card-progress-fill { background: var(--gold); }
+
+        /* --- STATS VIEW --- */
+        .view-section { display: none; padding: 20px; }
+        .view-section.active { display: block; animation: fadeIn 0.3s; }
         
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .stat-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.8rem; }
+        .stat-label { width: 40px; color: #888; }
+        .stat-bar-bg { flex-grow: 1; height: 20px; background: #222; border-radius: 4px; margin: 0 10px; position: relative; }
+        .stat-bar-fill { height: 100%; background: #444; border-radius: 4px; min-width: 2px; }
+        .stat-val { width: 50px; text-align: right; font-weight: bold; }
+
+        /* --- TOAST (UNDO) --- */
+        .toast {
+            position: fixed; bottom: 90px; left: 20px; right: 20px;
+            background: #222; border: 1px solid #333; color: #fff;
+            padding: 15px; border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            transform: translateY(150%); transition: transform 0.3s; z-index: 200;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateY(0); }
+        .btn-undo { background: none; border: 1px solid #555; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
 
         /* --- BOTTOM NAV --- */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
-            background: #000; border-top: 1px solid #222;
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            padding-bottom: 10px; z-index: 200;
+            background: #000; border-top: 1px solid #1a1a1a;
+            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; /* +1 för Settings */
+            z-index: 150;
         }
         .nav-btn {
             background: none; border: none; color: #555;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.7rem; gap: 5px;
+            font-size: 0.65rem; gap: 4px;
         }
         .nav-btn.active { color: #fff; }
-        .nav-btn i { font-size: 1.4rem; }
+        .nav-btn i { font-size: 1.2rem; }
 
-        /* CONFETTI CANVAS */
-        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+        /* MODAL (Export) */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:300; align-items:center; justify-content:center; }
+        .modal-content { background:#222; padding:20px; border-radius:15px; width:85%; text-align:center; }
+        .btn-full { width:100%; padding:15px; background:#333; border:none; color:#fff; border-radius:8px; margin-bottom:10px; font-weight:bold; }
 
-        /* UTILS */
-        .hidden { display: none !important; }
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeUp 0.3s; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
     </style>
 </head>
 <body>
 
-    <canvas id="confetti"></canvas>
-
     <!-- HEADER -->
     <div class="fixed-header">
         <div class="top-deck">
-            <div class="clock-area">
+            <div class="clock">
                 <h1 id="clock">07:00</h1>
-                <p>WARLORD V7</p>
+                <p>THE ARCHITECT V8</p>
             </div>
-            <div class="rings">
-                <!-- Ring 1: Tid (17h) -->
-                <div class="ring-box">
-                    <svg class="ring-svg" viewBox="0 0 55 55">
-                        <circle class="ring-bg" cx="27.5" cy="27.5" r="22"></circle>
-                        <circle id="ring-day" class="ring-val" cx="27.5" cy="27.5" r="22" stroke="#444"></circle>
-                    </svg>
-                    <div class="ring-icon">🌅</div>
-                </div>
-                <!-- Ring 2: Budget (Prio 1-3) -->
-                <div class="ring-box">
-                    <svg class="ring-svg" viewBox="0 0 55 55">
-                        <circle class="ring-bg" cx="27.5" cy="27.5" r="22"></circle>
-                        <circle id="ring-budget" class="ring-val" cx="27.5" cy="27.5" r="22" stroke="url(#gradPrio)"></circle>
-                        <defs><linearGradient id="gradPrio" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff3b30" /><stop offset="100%" stop-color="#ffcc00" /></linearGradient></defs>
-                    </svg>
-                    <div class="ring-icon">🔥</div>
-                </div>
-            </div>
+            <!-- Ringar borttagna för renare look, ersatta av Summary Card -->
         </div>
-
-        <!-- FILTER TABS -->
         <div class="filter-bar">
-            <div class="filter-pill active" onclick="setFilter('today', this)">IDAG (1-3)</div>
-            <div class="filter-pill" onclick="setFilter('all', this)">ALLA</div>
+            <div class="filter-pill active" onclick="setFilter('today', this)">IDAG</div>
+            <div class="filter-pill" onclick="setFilter('all', this)">ALLA PROJEKT</div>
             <div class="filter-pill" onclick="setFilter('todo', this)">GÖRA</div>
         </div>
     </div>
 
-    <!-- MAIN VIEW: TODAY -->
+    <!-- MAIN DASHBOARD -->
     <div id="view-today" class="view-section active">
+        <!-- Summary Card -->
+        <div class="summary-card">
+            <div class="sum-item">
+                <span class="sum-val" id="sum-time">0h 0m</span>
+                <span class="sum-label">Jobbat Idag</span>
+            </div>
+            <div class="sum-item">
+                <span class="sum-val" id="sum-prio1">0%</span>
+                <span class="sum-label">Prio 1 Mål</span>
+            </div>
+            <div class="progress-total">
+                <div class="progress-fill-total" id="daily-bar"></div>
+            </div>
+        </div>
+
         <div id="task-list"></div>
     </div>
 
-    <!-- STATS VIEWS -->
-    <div id="view-week" class="view-section" style="padding: 20px;">
-        <h2>Veckans Insats</h2>
-        <div id="week-stats"></div>
+    <!-- STATS VIEW -->
+    <div id="view-stats" class="view-section">
+        <h2>Veckans Analys</h2>
+        <div id="week-chart" style="margin-top:20px;"></div>
+        
+        <h2 style="margin-top:40px;">Fördelning</h2>
+        <div id="dist-chart"></div>
     </div>
 
-    <div id="view-month" class="view-section" style="padding: 20px;">
-        <h2>Månadens Insats</h2>
-        <div id="month-stats"></div>
+    <!-- SETTINGS VIEW -->
+    <div id="view-settings" class="view-section">
+        <h2>Data & Säkerhet</h2>
+        <button class="btn-full" onclick="exportData()"><i class="fas fa-download"></i> Exportera Backup</button>
+        <button class="btn-full" onclick="document.getElementById('file-input').click()"><i class="fas fa-upload"></i> Importera Backup</button>
+        <input type="file" id="file-input" style="display:none" onchange="importData(this)">
+        <p style="color:#666; font-size:0.8rem; text-align:center; margin-top:20px;">V8.0 - LocalStorage System</p>
     </div>
 
-    <!-- NAV BAR -->
+    <!-- UNDO TOAST -->
+    <div id="toast" class="toast">
+        <span><i class="fas fa-save"></i> Tid sparad.</span>
+        <button class="btn-undo" onclick="undoLast()">ÅNGRA</button>
+    </div>
+
+    <!-- BOTTOM NAV -->
     <div class="nav-bar">
-        <button class="nav-btn active" onclick="switchTab('today', this)"><i class="fas fa-bolt"></i>FOKUS</button>
-        <button class="nav-btn" onclick="switchTab('week', this)"><i class="fas fa-chart-column"></i>VECKA</button>
-        <button class="nav-btn" onclick="switchTab('month', this)"><i class="fas fa-calendar"></i>MÅNAD</button>
+        <button class="nav-btn active" onclick="switchView('today', this)"><i class="fas fa-layer-group"></i>FOKUS</button>
+        <button class="nav-btn" onclick="switchView('stats', this)"><i class="fas fa-chart-pie"></i>ANALYS</button>
+        <button class="nav-btn" onclick="switchView('settings', this)"><i class="fas fa-cog"></i>INST.</button>
     </div>
 
 <script>
-    // --- SETUP ---
-    const WAKE_TIME = 7;
-    const SLEEP_TIME = 24;
-
+    // --- KONFIGURATION ---
     const projects = [
-        { id: 'yt_long', title: 'YouTube Lång', prio: 1, target: 120 },
-        { id: 'yt_short', title: 'YouTube Kort', prio: 1, target: 60 },
-        
-        { id: 'social', title: 'Social Media', prio: 2, target: 45 },
-        { id: 'fam_act', title: 'Familj & Lek', prio: 2, target: 60 },
-        { id: 'azzah', title: 'Azzah Tid', prio: 2, target: 60 },
-        { id: 'kids', title: 'Barn 1-mot-1', prio: 2, target: 30 },
-        { id: 'health', title: 'Hälsa', prio: 2, target: 45 },
-
-        { id: 'prayer', title: 'Bön & Adhkar', prio: 3, target: 30 },
-        { id: 'meals', title: 'Mat & Hus', prio: 3, target: 45 },
-        { id: 'learning', title: 'Lärande', prio: 3, target: 30 },
-
-        { id: 'thriller', title: 'Bok: Deckare', prio: 4, target: 30 },
-        { id: 'biz', title: 'Business/Merch', prio: 4, target: 30 },
-        { id: 'prep', title: 'Meal Prep', prio: 4, target: 60 },
-        
-        { id: 'coach', title: 'Coaching', prio: 5, target: 30 },
-        { id: 'strategy', title: 'Strategi', prio: 6, target: 30 },
-        { id: 'ai', title: 'AI & Tech', prio: 6, target: 30 }
+        { id: 'yt_long', title: 'YouTube Lång', icon: '📹', prio: 1, target: 120 },
+        { id: 'yt_short', title: 'YouTube Kort', icon: '📱', prio: 1, target: 60 },
+        { id: 'social', title: 'Social Media', icon: '💬', prio: 2, target: 45 },
+        { id: 'fam_act', title: 'Familj & Lek', icon: '🎲', prio: 2, target: 60 },
+        { id: 'azzah', title: 'Azzah Tid', icon: '❤️', prio: 2, target: 60 },
+        { id: 'kids', title: 'Barn 1-mot-1', icon: '👶', prio: 2, target: 30 },
+        { id: 'health', title: 'Hälsa', icon: '🌿', prio: 2, target: 45 },
+        { id: 'prayer', title: 'Bön & Adhkar', icon: '📿', prio: 3, target: 30 },
+        { id: 'meals', title: 'Mat & Hus', icon: '🏠', prio: 3, target: 45 },
+        { id: 'learning', title: 'Lärande', icon: '🧠', prio: 3, target: 30 },
+        { id: 'thriller', title: 'Bok: Deckare', icon: '🕵️‍♂️', prio: 4, target: 30 },
+        { id: 'biz', title: 'Business', icon: '💼', prio: 4, target: 30 },
+        { id: 'prep', title: 'Meal Prep', icon: '🥦', prio: 4, target: 60 },
+        { id: 'coach', title: 'Coaching', icon: '🎓', prio: 5, target: 30 },
+        { id: 'strategy', title: 'Strategi', icon: '♟️', prio: 6, target: 30 },
+        { id: 'ai', title: 'AI & Tech', icon: '🤖', prio: 6, target: 30 }
     ];
 
-    let history = JSON.parse(localStorage.getItem('khalifa_v7_hist')) || {};
-    let activeTask = JSON.parse(localStorage.getItem('khalifa_v7_active')) || null;
-    let filterMode = 'today'; // 'today', 'all', 'todo'
+    // --- STATE MANAGER ---
+    let history = JSON.parse(localStorage.getItem('khalifa_v8_hist')) || {};
+    // ActiveTask Struktur: { id: 'yt_long', start: timestamp, accumulated: ms, state: 'running'|'paused' }
+    let activeTask = JSON.parse(localStorage.getItem('khalifa_v8_active')) || null;
+    let lastLog = null; // För Undo
+    let filterMode = 'today';
 
-    // --- CORE LOGIC ---
+    // --- HELPER FUNCTIONS ---
     function getTodayStr() { return new Date().toISOString().split('T')[0]; }
     function getTodayData() { 
         const d = getTodayStr();
         if(!history[d]) history[d] = {};
         return history[d];
     }
+    function saveState() {
+        localStorage.setItem('khalifa_v8_hist', JSON.stringify(history));
+        localStorage.setItem('khalifa_v8_active', JSON.stringify(activeTask));
+    }
+    function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
-    function renderList() {
+    // --- CORE RENDERER ---
+    function render() {
+        renderDashboard();
+        renderSummary();
+    }
+
+    function renderDashboard() {
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         const todayData = getTodayData();
-
-        // Sortera projekten så Prio 1 alltid är överst
-        const sorted = [...projects].sort((a,b) => a.prio - b.prio);
         
+        // Sortera: Prio 1 först
+        const sorted = [...projects].sort((a,b) => a.prio - b.prio);
         let lastPrio = 0;
 
         sorted.forEach(p => {
-            // FILTER LOGIK
+            // FILTER
             if(filterMode === 'today' && p.prio > 3) return;
             if(filterMode === 'todo' && (todayData[p.id] || 0) >= p.target) return;
 
-            // Header för zon
+            // ZONE HEADERS
             if(p.prio !== lastPrio) {
-                let label = "FRAMTID (Prio 4-6)";
-                if(p.prio === 1) label = "🔥 TUNG ZON (Prio 1)";
-                if(p.prio === 2) label = "⚖️ BALANS (Prio 2)";
-                if(p.prio === 3) label = "⚓️ GRUND (Prio 3)";
-                
+                let label = "";
+                if(p.prio === 1) label = "🔥 TUNG ZON";
+                else if(p.prio === 2) label = "⚖️ BALANS";
+                else if(p.prio === 3) label = "⚓️ GRUND";
+                else label = "🚀 FRAMTID (Prio 4-6)";
                 list.innerHTML += `<div class="zone-label">${label} <div class="zone-line"></div></div>`;
                 lastPrio = p.prio;
             }
 
-            const mins = todayData[p.id] || 0;
+            // STATE CALCULATION
+            const totalMins = todayData[p.id] || 0;
+            const isDone = totalMins >= p.target;
             const isActive = activeTask && activeTask.id === p.id;
-            const isDone = mins >= p.target;
+            const isPaused = isActive && activeTask.state === 'paused';
 
-            // CSS Klasser
+            // STREAK CALC (Enkel)
+            const streak = calculateStreak(p.id);
+            const streakHtml = streak > 1 ? `<span style="color:#ff9800; font-size:0.7rem;">🔥 ${streak} dagar</span>` : '';
+
+            // PROGRESS BAR
+            const progressPct = Math.min(100, (totalMins / p.target) * 100);
+            
+            // CLASSES
             let classes = 'task-card';
             if(p.prio === 1) classes += ' prio-1';
-            if(p.prio > 3) classes += ' prio-low';
             if(isActive) classes += ' recording';
-            else if(isDone) classes += ' done';
+            if(isPaused) classes += ' paused';
+            if(isDone && !isActive) classes += ' done';
 
-            // Ikon
-            let icon = isActive ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-play"></i>';
-            if(isDone && !isActive) icon = '<i class="fas fa-check"></i>';
+            // ICON & BUTTON
+            let btnIcon = '<i class="fas fa-play"></i>';
+            if(isActive && !isPaused) btnIcon = '<i class="fas fa-pause"></i>'; // Pause icon when running
+            if(isPaused) btnIcon = '<i class="fas fa-play"></i>'; // Play icon when paused
 
-            // Timer Text (Live eller Statisk)
-            let timeTxt = formatTime(mins);
-            let badgeId = `badge-${p.id}`;
+            // TIMER DISPLAY
+            let timeDisplay = formatTime(totalMins);
+            if(isActive) timeDisplay = "00:00"; // Placeholder, uppdateras av live-loop
 
-            // Hero Border för Prio 1
-            let borderHtml = p.prio === 1 ? '<div class="prio-1-border"></div>' : '';
+            // RENDER HTML
+            const html = `
+                <div class="${classes}" id="card-${p.id}" 
+                     oncontextmenu="return false;" 
+                     ontouchstart="handleTouchStart('${p.id}')" 
+                     ontouchend="handleTouchEnd()" 
+                     onmousedown="handleTouchStart('${p.id}')" 
+                     onmouseup="handleTouchEnd()">
+                     
+                    ${p.prio === 1 ? '<div class="prio-1-mark"></div>' : ''}
+                    
+                    <div class="card-top">
+                        <div style="flex-grow:1;">
+                            <span class="task-title">${p.icon} ${p.title}</span>
+                            <div class="task-meta">
+                                <span>Mål: ${p.target}m</span>
+                                ${streakHtml}
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="timer-badge" id="badge-${p.id}">${timeDisplay}</div>
+                            
+                            <!-- STOP BUTTON (Endast synlig när aktiv) -->
+                            <button class="btn-stop" onclick="stopTask('${p.id}', event)">
+                                <i class="fas fa-stop"></i>
+                            </button>
 
-            list.innerHTML += `
-                <div class="${classes}" id="card-${p.id}">
-                    ${borderHtml}
-                    <div class="task-info">
-                        <span class="task-title">${p.title}</span>
-                        <span class="task-meta">Mål: ${p.target}m</span>
+                            <!-- MAIN PLAY/PAUSE -->
+                            <button class="btn-main" onclick="toggleTask('${p.id}')">
+                                ${btnIcon}
+                            </button>
+                        </div>
                     </div>
-                    <div class="task-action">
-                        <div class="timer-badge" id="${badgeId}">${timeTxt}</div>
-                        <button class="btn-play" onclick="toggleTask('${p.id}')">${icon}</button>
+                    
+                    <div class="card-progress-bg">
+                        <div class="card-progress-fill" style="width:${progressPct}%"></div>
                     </div>
                 </div>
             `;
+            list.innerHTML += html;
         });
-        updateRings();
     }
 
-    // --- TIMER SYSTEM ---
+    // --- SUMMARY RENDER ---
+    function renderSummary() {
+        const todayData = getTodayData();
+        let totalMins = 0;
+        let prio1Goal = 0; 
+        let prio1Done = 0;
+
+        projects.forEach(p => {
+            const m = todayData[p.id] || 0;
+            totalMins += m;
+            if(p.prio === 1) {
+                prio1Goal += p.target;
+                prio1Done += Math.min(p.target, m);
+            }
+        });
+
+        document.getElementById('sum-time').innerText = formatTime(totalMins);
+        
+        const p1Pct = prio1Goal > 0 ? Math.round((prio1Done / prio1Goal) * 100) : 0;
+        document.getElementById('sum-prio1').innerText = p1Pct + "%";
+        
+        // Dagligt mål 14h (840m) för baren
+        const dayPct = Math.min(100, (totalMins / 840) * 100);
+        document.getElementById('daily-bar').style.width = dayPct + "%";
+    }
+
+    // --- TIMER LOGIC (V8 ENGINE) ---
     function toggleTask(id) {
-        if(navigator.vibrate) navigator.vibrate(20);
+        vibrate(20);
         const now = Date.now();
 
-        if(activeTask && activeTask.id === id) {
-            // STOP
-            const diff = Math.floor((now - activeTask.start)/60000);
-            addToHistory(id, diff);
-            
-            // Kolla om målet nåddes JUST NU
-            const p = projects.find(x=>x.id===id);
-            const total = getTodayData()[id];
-            // Trigga konfetti om vi gick över målet nyss (eller är över)
-            if(total >= p.target && (total - diff) < p.target) triggerConfetti();
-            else if (total >= p.target) triggerConfetti(); // Generös belöning
-
-            activeTask = null;
-        } else {
-            // SWITCH
-            if(activeTask) {
-                const diff = Math.floor((now - activeTask.start)/60000);
-                addToHistory(activeTask.id, diff);
+        if (activeTask && activeTask.id === id) {
+            // DET ÄR DEN AKTIVA UPPGIFTEN
+            if (activeTask.state === 'running') {
+                // PAUSA
+                const session = now - activeTask.lastTick;
+                activeTask.accumulated += session;
+                activeTask.state = 'paused';
+                activeTask.lastTick = null; // Stoppa klockan
+            } else {
+                // FORTSÄTT (RESUME)
+                activeTask.state = 'running';
+                activeTask.lastTick = now;
             }
-            // START
-            activeTask = { id: id, start: now };
+        } else {
+            // NY UPPGIFT
+            if (activeTask) autoStop(); // Stoppa gamla först
+            
+            // Starta ny
+            activeTask = {
+                id: id,
+                state: 'running',
+                accumulated: 0,
+                lastTick: now
+            };
         }
-
         saveState();
-        renderList();
+        render();
     }
 
-    function addToHistory(id, mins) {
-        if(mins <= 0) return;
+    function stopTask(id, event) {
+        if(event) event.stopPropagation(); // Förhindra klick på kortet
+        vibrate(40);
+        autoStop();
+        render();
+    }
+
+    function autoStop() {
+        if(!activeTask) return;
+        
+        // Räkna ut sista sessionen om den körs
+        let finalSession = 0;
+        if(activeTask.state === 'running') {
+            finalSession = Date.now() - activeTask.lastTick;
+        }
+        
+        const totalSessionMs = activeTask.accumulated + finalSession;
+        const totalSessionMins = Math.floor(totalSessionMs / 60000);
+        
+        if(totalSessionMins > 0) {
+            commitTime(activeTask.id, totalSessionMins);
+        }
+        
+        activeTask = null;
+        saveState();
+    }
+
+    function commitTime(id, mins) {
         const d = getTodayStr();
         if(!history[d]) history[d] = {};
         if(!history[d][id]) history[d][id] = 0;
+        
         history[d][id] += mins;
+        
+        // Spara för Undo
+        lastLog = { date: d, id: id, mins: mins };
+        showToast();
+        saveState();
     }
 
-    // LIVE TIMER UPDATE (Varje sekund)
+    // --- LIVE UPDATE LOOP ---
     setInterval(() => {
         if(activeTask) {
-            const now = Date.now();
-            const diffSec = Math.floor((now - activeTask.start)/1000);
-            
             const badge = document.getElementById(`badge-${activeTask.id}`);
             if(badge) {
+                let currentMs = activeTask.accumulated;
+                if(activeTask.state === 'running') {
+                    currentMs += (Date.now() - activeTask.lastTick);
+                }
+                
                 // Formatera MM:SS
-                const m = Math.floor(diffSec / 60);
-                const s = diffSec % 60;
-                badge.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                const totalSec = Math.floor(currentMs / 1000);
+                const m = Math.floor(totalSec / 60);
+                const s = totalSec % 60;
+                
+                badge.innerText = `${m}:${String(s).padStart(2,'0')}`;
+                
+                if(activeTask.state === 'paused') {
+                    badge.innerText = "PAUS";
+                }
             }
         }
+        
+        // Klocka
+        const d = new Date();
+        document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        
     }, 1000);
 
-    // --- GUI HELPERS ---
+    // --- LONG PRESS (+5 MIN) ---
+    let touchTimer;
+    function handleTouchStart(id) {
+        touchTimer = setTimeout(() => {
+            vibrate(100);
+            commitTime(id, 5); // Lägg till 5 min
+            alert(`+5 min tillagt på ${projects.find(p=>p.id===id).title}`);
+            render();
+        }, 800); // 800ms hold
+    }
+    function handleTouchEnd() { clearTimeout(touchTimer); }
+
+    // --- UNDO SYSTEM ---
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 5000);
+    }
+    function undoLast() {
+        if(lastLog) {
+            history[lastLog.date][lastLog.id] -= lastLog.mins;
+            lastLog = null;
+            document.getElementById('toast').classList.remove('show');
+            saveState();
+            render();
+            alert("Tiden ångrad.");
+        }
+    }
+
+    // --- STATS ENGINE (SVG GRAPHS) ---
+    function renderStats() {
+        // Vecka Chart
+        const wContainer = document.getElementById('week-chart');
+        wContainer.innerHTML = '';
+        const days = ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'];
+        
+        let maxVal = 1;
+        let weekData = [];
+        
+        for(let i=6; i>=0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dStr = d.toISOString().split('T')[0];
+            const dayData = history[dStr] || {};
+            const total = Object.values(dayData).reduce((a,b)=>a+b,0);
+            if(total > maxVal) maxVal = total;
+            weekData.push({ day: days[d.getDay()], val: total });
+        }
+
+        weekData.forEach(d => {
+            const h = (d.val / maxVal) * 100; // Höjd i %
+            const color = d.val > 480 ? '#4caf50' : '#444'; // Grön om > 8h
+            wContainer.innerHTML += `
+                <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
+                    <div style="height:100px; width:100%; display:flex; align-items:flex-end; background:#222; border-radius:4px;">
+                        <div style="width:100%; background:${color}; height:${h}%; border-radius:4px;"></div>
+                    </div>
+                    <span style="font-size:0.6rem; color:#666; margin-top:5px;">${d.day}</span>
+                </div>
+            `;
+        });
+        wContainer.style.display = "flex";
+        wContainer.style.justifyContent = "space-between";
+    }
+
+    // --- UTILS & EXPORT ---
     function setFilter(mode, btn) {
         filterMode = mode;
         document.querySelectorAll('.filter-pill').forEach(el => el.classList.remove('active'));
         btn.classList.add('active');
-        renderList();
+        render();
     }
 
-    function switchTab(view, btn) {
+    function switchView(view, btn) {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.getElementById(`view-${view}`).classList.add('active');
-        
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         btn.classList.add('active');
-
-        if(view !== 'today') renderStats(view === 'week' ? 7 : 30, `view-${view}`);
+        if(view === 'stats') renderStats();
     }
 
-    function updateRings() {
-        // Ring 1: Tid (17h)
-        const h = new Date().getHours() + new Date().getMinutes()/60;
-        const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
-        setRing('ring-day', dayPct);
-
-        // Ring 2: Budget (Prio 1-3)
-        const todayData = getTodayData();
-        let goal = 0, done = 0;
-        projects.filter(p => p.prio <= 3).forEach(p => {
-            goal += p.target;
-            done += Math.min(p.target, (todayData[p.id] || 0));
-        });
-        setRing('ring-budget', goal > 0 ? done/goal : 0);
-    }
-
-    function setRing(id, pct) {
-        const circle = document.getElementById(id);
-        const r = circle.r.baseVal.value;
-        const c = r * 2 * Math.PI;
-        circle.style.strokeDashoffset = c - (pct * c);
-    }
-
-    function renderStats(days, containerId) {
-        // Enkel text-baserad statistik för nu
-        let html = `<div style="text-align:center; padding:20px; color:#666;">Statistik kommer när du har samlat data!</div>`;
-        // Här kan vi bygga grafer senare
-        document.getElementById(containerId).innerHTML = html;
-    }
-
-    function saveState() {
-        localStorage.setItem('khalifa_v7_hist', JSON.stringify(history));
-        localStorage.setItem('khalifa_v7_active', JSON.stringify(activeTask));
-    }
-
-    function formatTime(m) {
-        return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm';
-    }
-
-    function updateClock() {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    }
-
-    // --- KONFETTI ---
-    function triggerConfetti() {
-        const c = document.getElementById('confetti');
-        const ctx = c.getContext('2d');
-        c.width = window.innerWidth; c.height = window.innerHeight;
-        let p = [];
-        for(let i=0; i<150; i++) p.push({
-            x: c.width/2, y: c.height/2,
-            vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20,
-            color: `hsl(${Math.random()*360}, 100%, 50%)`, life: 100
-        });
-        function anim() {
-            ctx.clearRect(0,0,c.width,c.height);
-            p.forEach((k,i) => {
-                k.x+=k.vx; k.y+=k.vy; k.life--; k.vy+=0.5;
-                ctx.fillStyle=k.color; ctx.fillRect(k.x,k.y,5,5);
-                if(k.life<=0) p.splice(i,1);
-            });
-            if(p.length) requestAnimationFrame(anim);
+    function formatTime(m) { return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm'; }
+    
+    function calculateStreak(id) {
+        let streak = 0;
+        // Kolla bakåt 30 dagar
+        for(let i=0; i<30; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dStr = d.toISOString().split('T')[0];
+            if(history[dStr] && history[dStr][id] > 10) streak++; // Minst 10 min för streak
+            else if(i > 0) break; // Avbruten streak (men tillåt dagens nolla om man inte börjat än)
         }
-        anim();
+        return streak;
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", "khalifa_backup.json");
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
+
+    function importData(input) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                history = JSON.parse(e.target.result);
+                saveState();
+                alert("Import lyckades!");
+                render();
+            } catch(err) { alert("Fel på filen!"); }
+        };
+        reader.readAsText(file);
     }
 
     // INIT
-    setInterval(updateClock, 10000);
-    updateClock();
-    renderList();
+    render();
 
 </script>
 </body>
