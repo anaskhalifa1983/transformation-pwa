@@ -3,374 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anas Visual Dashboard v4</title>
+    <title>KHALIFA OS - FINAL</title>
     <style>
         :root {
-            --bg-color: #0d0d0d;
-            --card-bg: #1a1a1a;
-            --text-main: #ffffff;
+            --bg-color: #050505;
+            --card-bg: #141414;
+            --text-main: #e0e0e0;
             --text-muted: #888;
             
-            /* Samma färgschema för igenkänning */
-            --prio1: #ff5252; /* Röd */
-            --prio2: #ff9800; /* Orange */
-            --prio3: #2196f3; /* Blå */
-            --prio46: #9c27b0; /* Lila/Blandat för strategi */
+            --prio1: #ff4444; 
+            --prio2: #ff8800; 
+            --prio3: #2196f3; 
+            --prio46: #aa00ff;
             
-            --day-bar-bg: #333;
-            --day-bar-fill: #e0e0e0;
+            --gold: #ffd700; /* GULD FÄRG */
+            --gold-bg: #423a05;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 10px;
-            padding-top: 140px; /* Plats för den fasta toppen */
-            padding-bottom: 50px;
+            padding: 15px;
+            padding-top: 150px; /* Plats för header */
+            padding-bottom: 80px;
+            -webkit-user-select: none; /* Förhindra markering text på mobil */
+            user-select: none;
         }
 
-        /* --- DEN FASTA TOPPEN (DASHBOARD) --- */
+        /* --- HEADER & MÄTARE --- */
         .fixed-header {
             position: fixed;
             top: 0; left: 0; right: 0;
-            background-color: #000;
+            background: rgba(5,5,5,0.95);
+            backdrop-filter: blur(10px);
             padding: 15px;
             z-index: 1000;
-            border-bottom: 2px solid #333;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            border-bottom: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .clock { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .clock { font-size: 2rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
         .timer-btn { 
-            background: #222; border: 1px solid var(--prio2); color: var(--prio2);
-            padding: 5px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;
+            background: #222; border: 1px solid #444; color: #ccc;
+            padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
         }
 
-        /* MÄTARE A: 17 TIMMARS DAGEN */
-        .meter-label { font-size: 0.75rem; color: #888; display: flex; justify-content: space-between; margin-bottom: 3px;}
-        .meter-track {
-            background: #222; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;
-        }
-        .meter-fill-time {
-            height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
-            width: 0%; transition: width 1s linear;
-        }
+        .meter-group { margin-bottom: 8px; }
+        .meter-label { font-size: 0.7rem; color: #666; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .meter-track { background: #222; height: 8px; border-radius: 4px; overflow: hidden; position: relative; }
         
-        /* MÄTARE B: DIN INSATS (WORK) */
-        .meter-fill-work {
-            height: 100%; background: linear-gradient(90deg, #2196f3, #9c27b0);
-            width: 0%; transition: width 0.5s ease;
-        }
+        /* Dag-mätare (Tid) */
+        .meter-fill-time { height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336); width: 0%; transition: width 1s linear; }
+        
+        /* Jobb-mätare (Insats) */
+        .meter-fill-work { height: 100%; background: linear-gradient(90deg, #2196f3, #aa00ff); width: 0%; transition: width 0.5s ease; }
 
-        /* --- JOKER SEKTIONEN (PRIO 4-6) --- */
-        .joker-section {
-            background: linear-gradient(135deg, #22102a 0%, #1a1a1a 100%);
-            border: 1px solid var(--prio46);
-            border-radius: 8px;
+        /* --- JOKER / FÖRSLAG --- */
+        .joker-box {
+            background: linear-gradient(135deg, #2a0a36 0%, #141414 100%);
+            border: 1px solid #4a148c;
+            border-radius: 12px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+        .joker-label { color: #d1c4e9; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+        .joker-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; }
         
-        .joker-title { color: var(--prio46); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .joker-card-display { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; }
-        
-        .joker-controls { display: flex; gap: 10px; justify-content: center; }
-        .btn-outline { background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 12px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
-        .btn-outline:active { background: #333; }
-
-        /* LISTA FÖR PRIO 4-6 (Dold som default) */
-        .extra-list { display: none; text-align: left; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
-        .extra-list.show { display: block; animation: fadeIn 0.3s; }
-
-        /* --- HUVUDLISTOR (PRIO 1-3) --- */
+        /* --- ZONER --- */
         .zone-header {
-            padding: 12px; border-radius: 8px; margin-bottom: 8px;
+            padding: 15px; border-radius: 10px; margin-bottom: 10px; margin-top: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            font-weight: 800; font-size: 1rem; letter-spacing: 0.5px;
+            cursor: pointer; transition: transform 0.1s;
         }
-        
-        .z1 { background: #2a1a1a; border-left: 5px solid var(--prio1); color: #ffcccc; }
-        .z2 { background: #2a2010; border-left: 5px solid var(--prio2); color: #ffe0b2; }
-        .z3 { background: #101a2a; border-left: 5px solid var(--prio3); color: #bbdefb; }
+        .zone-header:active { transform: scale(0.98); }
+        .arrow { transition: transform 0.3s; opacity: 0.5; }
+        .closed .arrow { transform: rotate(-90deg); }
 
-        .project-container { display: block; margin-bottom: 20px; } /* Alltid öppna för överblick, eller toggla */
-        
+        .z1 { background: linear-gradient(90deg, #2b0b0b, #141414); border-left: 4px solid var(--prio1); color: #ffcccc; }
+        .z2 { background: linear-gradient(90deg, #2b1b0b, #141414); border-left: 4px solid var(--prio2); color: #ffe0b2; }
+        .z3 { background: linear-gradient(90deg, #0b1b2b, #141414); border-left: 4px solid var(--prio3); color: #bbdefb; }
+
+        .project-list { transition: max-height 0.3s ease; overflow: hidden; }
+        .project-list.closed { display: none; }
+
+        /* --- KORTEN --- */
         .task-row {
             background: var(--card-bg);
             border-bottom: 1px solid #222;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s;
         }
-        .task-info { flex-grow: 1; }
-        .task-name { font-size: 0.95rem; display: block; }
-        .task-meta { font-size: 0.75rem; color: #666; }
         
-        .task-actions { display: flex; gap: 5px; }
+        /* GULD STATUS (När klar) */
+        .task-row.gold-status {
+            background: linear-gradient(90deg, var(--gold-bg), #141414);
+            border-left: 3px solid var(--gold);
+        }
+        .gold-status .task-name { color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+
+        .task-info { flex-grow: 1; padding-right: 10px; }
+        .task-name { font-size: 1rem; font-weight: 500; display: block; margin-bottom: 4px; }
+        .task-meta { font-size: 0.75rem; color: #555; display: block; }
+        
         .btn-add {
-            background: #333; border: none; color: white;
-            width: 40px; height: 30px; border-radius: 4px;
-            font-weight: bold; cursor: pointer;
+            background: #252525; border: none; color: #fff;
+            width: 44px; height: 34px; border-radius: 6px;
+            font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: background 0.2s;
         }
         .btn-add:active { background: #fff; color: #000; }
 
-        /* Timer Modal */
-        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; }
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #222; padding: 20px; border-radius: 10px; width: 80%; text-align: center; border: 2px solid var(--prio2); }
+        /* Extra Listan */
+        .extra-list { display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; text-align: left; }
+        .extra-list.show { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .flash { animation: flash 0.5s; }
-        @keyframes flash { 0% { background-color: #333; } 50% { background-color: #4caf50; } 100% { background-color: #333; } }
+        /* Backup Section */
+        .backup-section { text-align: center; margin-top: 50px; padding: 20px; border-top: 1px solid #222; }
+        .backup-text { font-size: 0.7rem; color: #444; word-break: break-all; margin-top: 10px; display: none; user-select: text; -webkit-user-select: text;}
+
+        /* Timer Modal */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; backdrop-filter: blur(5px); }
+        .modal { position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); width: 85%; text-align: center; }
+        .timer-big { font-size: 4rem; font-weight: 900; font-variant-numeric: tabular-nums; margin: 20px 0; }
+        .grid-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     </style>
 </head>
 <body>
 
-    <!-- FASTA TOPPEN -->
+    <!-- TOPP (HUD) -->
     <div class="fixed-header">
         <div class="top-row">
-            <div class="clock" id="clock">00:00</div>
-            <button class="timer-btn" onclick="openTimer()">⏳ TIMER</button>
+            <div class="clock" id="clock">07:00</div>
+            <button class="timer-btn" onclick="openTimer()">⚡ FOKUS</button>
         </div>
 
-        <!-- MÄTARE 1: DAGEN (TID) -->
-        <div class="meter-label">
-            <span>Dagens 17 Timmar</span>
-            <span id="day-percent">0%</span>
-        </div>
-        <div class="meter-track">
-            <div class="meter-fill-time" id="day-bar"></div>
-        </div>
-
-        <!-- MÄTARE 2: INSATS (JOBB) -->
-        <div class="meter-label">
-            <span>Din Insats (Mål: 14h)</span>
-            <span id="work-percent">0%</span>
-        </div>
-        <div class="meter-track">
-            <div class="meter-fill-work" id="work-bar"></div>
-        </div>
-    </div>
-
-    <!-- JOKER SEKTIONEN (PRIO 4-6) -->
-    <div class="joker-section">
-        <div class="joker-title">🟣 DAGENS FÖRSLAG (Prio 4-6)</div>
-        <div class="joker-card-display" id="joker-display">Laddar...</div>
-        
-        <div class="joker-controls">
-            <button class="btn-outline" onclick="rollJoker()">🎲 Slumpa Ny</button>
-            <button class="btn-outline" onclick="toggleExtraList()">📋 VISA ALLA</button>
+        <!-- MÄTARE: DAGEN -->
+        <div class="meter-group">
+            <div class="meter-label">
+                <span>Dagens 17h (07-00)</span>
+                <span id="day-percent">0%</span>
+            </div>
+            <div class="meter-track">
+                <div class="meter-fill-time" id="day-bar"></div>
+            </div>
         </div>
 
-        <!-- DEN GÖMDA LISTAN -->
-        <div class="extra-list" id="extra-list-container">
-            <!-- Här hamnar alla Prio 4, 5, 6 -->
+        <!-- MÄTARE: ARBETE -->
+        <div class="meter-group">
+            <div class="meter-label">
+                <span>Energi-Insats</span>
+                <span id="work-percent">0h 0m</span>
+            </div>
+            <div class="meter-track">
+                <div class="meter-fill-work" id="work-bar"></div>
+            </div>
         </div>
     </div>
 
-    <!-- ZON 1: TUNG -->
-    <div class="zone-header z1">🔴 PRIO 1: TUNG (Max 6h)</div>
-    <div class="project-container" id="list-prio1"></div>
+    <!-- JOKER -->
+    <div class="joker-box">
+        <div class="joker-label">✨ DAGENS EXTRA-MISSION (Prio 4-6)</div>
+        <div class="joker-title" id="joker-display">Laddar...</div>
+        <div style="display: flex; gap:10px; justify-content: center;">
+            <button class="btn-outline" onclick="rollJoker()">🎲 Byt</button>
+            <button class="btn-outline" onclick="toggleExtra()">📂 Alla</button>
+        </div>
+        <div class="extra-list" id="extra-list"></div>
+    </div>
 
-    <!-- ZON 2: BALANS -->
-    <div class="zone-header z2">🟠 PRIO 2: BALANS (Max 4h)</div>
-    <div class="project-container" id="list-prio2"></div>
+    <!-- ZON 1 -->
+    <div class="zone-header z1" onclick="toggleZone('z1-list', this)">
+        <span>🔴 PRIO 1: TUNG (Max 6h)</span>
+        <span class="arrow">▼</span>
+    </div>
+    <div id="z1-list" class="project-list"></div>
 
-    <!-- ZON 3: GRUND -->
-    <div class="zone-header z3">🔵 PRIO 3: GRUND (Max 4h)</div>
-    <div class="project-container" id="list-prio3"></div>
+    <!-- ZON 2 -->
+    <div class="zone-header z2" onclick="toggleZone('z2-list', this)">
+        <span>🟠 PRIO 2: BALANS (Max 4h)</span>
+        <span class="arrow">▼</span>
+    </div>
+    <div id="z2-list" class="project-list"></div>
 
+    <!-- ZON 3 -->
+    <div class="zone-header z3" onclick="toggleZone('z3-list', this)">
+        <span>🔵 PRIO 3: GRUND (Max 4h)</span>
+        <span class="arrow">▼</span>
+    </div>
+    <div id="z3-list" class="project-list"></div>
+
+
+    <!-- BACKUP SÄKERHET -->
+    <div class="backup-section">
+        <button class="btn-outline" onclick="exportData()">💾 SPARA BACKUP</button>
+        <div id="backup-output" class="backup-text"></div>
+        <div style="margin-top:10px;">
+            <button class="btn-outline" style="border-color:#333; color:#444;" onclick="hardReset()">⚠ ÅTERSTÄLL APP</button>
+        </div>
+    </div>
 
     <!-- TIMER MODAL -->
     <div class="modal-overlay" id="timer-overlay">
         <div class="modal">
-            <h2>Fokus Timer</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                <button class="btn-outline" onclick="startTimer(15)">15 min</button>
-                <button class="btn-outline" onclick="startTimer(30)">30 min</button>
-                <button class="btn-outline" onclick="startTimer(45)">45 min</button>
-                <button class="btn-outline" onclick="startTimer(60)">60 min</button>
+            <div style="color:#888; letter-spacing: 2px;">FOKUS LÄGE</div>
+            <div id="timer-display" class="timer-big">00:00</div>
+            
+            <div id="timer-controls" class="grid-btns">
+                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(15)">15m</button>
+                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(30)">30m</button>
+                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(45)">45m</button>
+                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(60)">60m</button>
             </div>
-            <button class="btn-outline" style="width:100%; border-color:#f44336; color:#f44336" onclick="closeTimer()">Avbryt</button>
-            <div id="timer-countdown" style="font-size: 2rem; margin-top: 15px; font-weight:bold;"></div>
+            <button class="btn-outline" style="width:100%; margin-top:15px; border-color:#f44336; color:#f44336;" onclick="closeTimer()">AVBRYT</button>
         </div>
     </div>
 
 <script>
-    // --- KONFIGURATION ---
-    const WAKE_TIME = 7; // Klockan 07:00 börjar mätaren
-    const SLEEP_TIME = 24; // Klockan 00:00 slutar mätaren (24 = midnatt)
-    const TOTAL_DAY_HOURS = SLEEP_TIME - WAKE_TIME; // 17 timmar
-    const TOTAL_WORK_GOAL_MINUTES = 14 * 60; // 14 timmar mål
+    // --- INSTÄLLNINGAR ---
+    const WAKE_TIME = 7; 
+    const SLEEP_TIME = 24; 
 
-    // --- PROJEKT DATA ---
+    // --- PROJEKT (NU MED EMOJIS) ---
     const projects = [
-        // PRIO 1
-        { id: 'yt_long', title: 'YouTube Lång', meta: 'Batch-inspelning / Planering', prio: 1 },
-        { id: 'yt_short', title: 'YouTube Kort', meta: 'Shorts / Reels / Klipp', prio: 1 },
+        // PRIO 1 (Target: minuter för att nå GULD)
+        { id: 'yt_long', title: '📹 YouTube Lång', meta: 'Batch-inspelning / Planering', prio: 1, target: 120 },
+        { id: 'yt_short', title: '📱 YouTube Kort', meta: 'Shorts / Reels / Klipp', prio: 1, target: 60 },
         
         // PRIO 2
-        { id: 'social', title: 'Social Media', meta: 'Community & Text', prio: 2 },
-        { id: 'fam_act', title: 'Familjeaktivitet', meta: 'Lek / Utflykt', prio: 2 },
-        { id: 'azzah', title: 'Azzah Tid', meta: 'Relation & Stöd', prio: 2 },
-        { id: 'kids', title: 'Barn 1-mot-1', meta: 'Fokus tid', prio: 2 },
-        { id: 'health', title: 'Hälsa', meta: 'Promenad / Vila', prio: 2 },
+        { id: 'social', title: '💬 Social Media', meta: 'Community & Text', prio: 2, target: 45 },
+        { id: 'fam_act', title: '🎲 Familj & Lek', meta: 'Aktivitet / Utflykt', prio: 2, target: 60 },
+        { id: 'azzah', title: '❤️ Azzah Tid', meta: 'Relation & Stöd', prio: 2, target: 60 },
+        { id: 'kids', title: '👶 Barn 1-mot-1', meta: 'Fokus tid', prio: 2, target: 30 },
+        { id: 'health', title: '🌿 Hälsa', meta: 'Promenad / Vila', prio: 2, target: 45 },
 
         // PRIO 3
-        { id: 'prayer', title: 'Bön & Adhkar', meta: 'Andlighet', prio: 3 },
-        { id: 'meals', title: 'Mat & Hus', meta: 'Gemenskap & Drift', prio: 3 },
-        { id: 'autobio', title: 'Bok: Självbiografi', meta: 'Skriv lite', prio: 3 },
-        { id: 'learning', title: 'Lärande', meta: 'Lyssna / Läsa', prio: 3 },
+        { id: 'prayer', title: '🕌 Bön & Adhkar', meta: 'Andlighet', prio: 3, target: 30 },
+        { id: 'meals', title: '🍲 Mat & Hus', meta: 'Gemenskap & Drift', prio: 3, target: 45 },
+        { id: 'autobio', title: '📖 Självbiografi', meta: 'Skriv lite', prio: 3, target: 15 },
+        { id: 'learning', title: '🧠 Lärande', meta: 'Lyssna / Läsa', prio: 3, target: 30 },
 
-        // PRIO 4-6 (Dessa hamnar i "Joker" eller "Visa alla")
-        { id: 'thriller', title: 'Bok: Deckare', meta: 'Prio 4 (Vecka)', prio: 4 },
-        { id: 'biz', title: 'Business/Merch', meta: 'Prio 4 (Vecka)', prio: 4 },
-        { id: 'prep', title: 'Meal Prep', meta: 'Prio 4 (Vecka)', prio: 4 },
-        { id: 'coach', title: 'Coaching Plattform', meta: 'Prio 5 (Varannan)', prio: 5 },
-        { id: 'azzah_biz', title: 'Azzah Business', meta: 'Prio 5 (Varannan)', prio: 5 },
-        { id: 'strategy', title: 'Strategi & Framtid', meta: 'Prio 6 (Månad)', prio: 6 },
-        { id: 'ai', title: 'AI & Tech', meta: 'Prio 6 (Månad)', prio: 6 }
+        // PRIO 4-6
+        { id: 'thriller', title: '🕵️‍♂️ Bok: Deckare', meta: 'Veckovis', prio: 4, target: 30 },
+        { id: 'biz', title: '👕 Business/Merch', meta: 'Veckovis', prio: 4, target: 30 },
+        { id: 'prep', title: '🥦 Meal Prep', meta: 'Veckovis', prio: 4, target: 60 },
+        { id: 'coach', title: '🎓 Coaching', meta: 'Varannan', prio: 5, target: 30 },
+        { id: 'strategy', title: '♟️ Strategi', meta: 'Månadsvis', prio: 6, target: 30 },
+        { id: 'ai', title: '🤖 AI & Tech', meta: 'Månadsvis', prio: 6, target: 30 }
     ];
 
-    // --- STATE ---
-    let progress = JSON.parse(localStorage.getItem('anasProgressV4')) || {};
-    let totalMinutesToday = 0;
-
-    // Räkna total tid vid start
-    for(let key in progress) {
-        // Enkel reset-logik: Vi nollställer manuellt "work meter" varje dag i koden nedan
-        // För enkelhetens skull i denna visuella version sparar vi dagens total
-    }
+    // --- LOGIK ---
+    let progress = JSON.parse(localStorage.getItem('anasDatav5')) || {};
     
-    // Check Reset (Enkel daglig reset av mätare)
-    const lastDate = localStorage.getItem('anasDate');
+    // Auto-Reset vid ny dag
+    const lastDate = localStorage.getItem('anasDatev5');
     const todayStr = new Date().toDateString();
     if(lastDate !== todayStr) {
-        progress = {}; // Nollställ allt ny dag
-        localStorage.setItem('anasDate', todayStr);
-        localStorage.setItem('anasProgressV4', JSON.stringify(progress));
+        progress = {}; 
+        localStorage.setItem('anasDatev5', todayStr);
+        localStorage.setItem('anasDatav5', JSON.stringify(progress));
     }
 
-    // --- RENDER FUNCTION ---
     function render() {
-        // Uppdatera totalen
-        totalMinutesToday = Object.values(progress).reduce((a, b) => a + b, 0);
-        
-        // 1. Render Prio 1-3 Lists
-        renderZone(1, 'list-prio1');
-        renderZone(2, 'list-prio2');
-        renderZone(3, 'list-prio3');
+        // Töm listor
+        document.getElementById('z1-list').innerHTML = '';
+        document.getElementById('z2-list').innerHTML = '';
+        document.getElementById('z3-list').innerHTML = '';
+        document.getElementById('extra-list').innerHTML = '';
 
-        // 2. Render Extra List (Prio 4-6)
-        const extraContainer = document.getElementById('extra-list-container');
-        extraContainer.innerHTML = '';
-        projects.filter(p => p.prio >= 4).forEach(p => {
-            extraContainer.innerHTML += createRow(p);
+        let totalMins = 0;
+
+        projects.forEach(p => {
+            const mins = progress[p.id] || 0;
+            totalMins += mins;
+            const isGold = mins >= p.target; // Har vi nått målet?
+            
+            const html = `
+                <div class="task-row ${isGold ? 'gold-status' : ''}">
+                    <div class="task-info">
+                        <span class="task-name">${p.title} ${mins > 0 ? `(${formatTime(mins)})` : ''}</span>
+                        <span class="task-meta">${p.meta} ${isGold ? '⭐ KLAR' : ''}</span>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-add" onclick="addTime('${p.id}', 15)">15</button>
+                        <button class="btn-add" onclick="addTime('${p.id}', 30)">30</button>
+                    </div>
+                </div>
+            `;
+
+            if(p.prio === 1) document.getElementById('z1-list').innerHTML += html;
+            else if(p.prio === 2) document.getElementById('z2-list').innerHTML += html;
+            else if(p.prio === 3) document.getElementById('z3-list').innerHTML += html;
+            else document.getElementById('extra-list').innerHTML += html;
         });
 
-        // 3. Update Meters
-        updateMeters();
-    }
-
-    function renderZone(prio, elementId) {
-        const container = document.getElementById(elementId);
-        container.innerHTML = '';
-        projects.filter(p => p.prio === prio).forEach(p => {
-            container.innerHTML += createRow(p);
-        });
-    }
-
-    function createRow(p) {
-        const mins = progress[p.id] || 0;
-        const timeStr = mins > 0 ? `<span style="color:var(--prio2); font-weight:bold;">${formatTime(mins)}</span>` : '';
-        
-        return `
-            <div class="task-row">
-                <div class="task-info">
-                    <span class="task-name">${p.title} ${timeStr}</span>
-                    <span class="task-meta">${p.meta}</span>
-                </div>
-                <div class="task-actions">
-                    <button class="btn-add" onclick="addTime('${p.id}', 15)">15</button>
-                    <button class="btn-add" onclick="addTime('${p.id}', 30)">30</button>
-                </div>
-            </div>
-        `;
+        // Uppdatera mätare
+        updateMeters(totalMins);
     }
 
     function addTime(id, amount) {
         if(!progress[id]) progress[id] = 0;
         progress[id] += amount;
-        localStorage.setItem('anasProgressV4', JSON.stringify(progress));
+        localStorage.setItem('anasDatav5', JSON.stringify(progress));
         render();
     }
 
-    // --- MÄTARE LOGIK ---
-    function updateMeters() {
-        // 1. Time Meter (Day Progress)
+    function updateMeters(totalWorkMins) {
+        // Tid Mätare
         const now = new Date();
         const currentHour = now.getHours() + (now.getMinutes()/60);
+        const dayDuration = SLEEP_TIME - WAKE_TIME;
         let dayPct = 0;
         
-        if(currentHour >= WAKE_TIME && currentHour < SLEEP_TIME) {
-            dayPct = ((currentHour - WAKE_TIME) / TOTAL_DAY_HOURS) * 100;
-        } else if (currentHour >= SLEEP_TIME) {
-            dayPct = 100;
+        if(currentHour >= WAKE_TIME) {
+            dayPct = ((currentHour - WAKE_TIME) / dayDuration) * 100;
         }
-        
-        document.getElementById('day-bar').style.width = `${Math.min(dayPct, 100)}%`;
-        document.getElementById('day-percent').innerText = `${Math.round(dayPct)}%`;
+        document.getElementById('day-bar').style.width = Math.min(dayPct, 100) + "%";
+        document.getElementById('day-percent').innerText = Math.round(Math.min(dayPct, 100)) + "%";
 
-        // Färga stapeln röd om dagen börjar ta slut
-        const bar = document.getElementById('day-bar');
-        if(dayPct > 80) bar.style.background = '#f44336'; // Röd
-        else if(dayPct > 50) bar.style.background = '#ffeb3b'; // Gul
-
-        // 2. Work Meter
-        const workPct = (totalMinutesToday / TOTAL_WORK_GOAL_MINUTES) * 100;
-        document.getElementById('work-bar').style.width = `${Math.min(workPct, 100)}%`;
-        document.getElementById('work-percent').innerText = `${formatTime(totalMinutesToday)}`;
+        // Work Mätare (Mål 14h = 840 min)
+        const workPct = (totalWorkMins / 840) * 100;
+        document.getElementById('work-bar').style.width = Math.min(workPct, 100) + "%";
+        document.getElementById('work-percent').innerText = formatTime(totalWorkMins);
     }
 
-    // --- JOKER LOGIK ---
+    // --- GUI FUNKTIONER ---
+    function formatTime(m) {
+        if(m >= 60) return (m/60).toFixed(1) + 'h';
+        return m + 'm';
+    }
+
+    function toggleZone(id, header) {
+        const list = document.getElementById(id);
+        if(list.classList.contains('closed')) {
+            list.classList.remove('closed');
+            header.classList.remove('closed');
+        } else {
+            list.classList.add('closed');
+            header.classList.add('closed');
+        }
+    }
+
     function rollJoker() {
         const extras = projects.filter(p => p.prio >= 4);
         const random = extras[Math.floor(Math.random() * extras.length)];
         document.getElementById('joker-display').innerText = random.title;
     }
 
-    function toggleExtraList() {
-        const list = document.getElementById('extra-list-container');
-        if(list.style.display === 'block') {
-            list.style.display = 'none';
-        } else {
-            list.style.display = 'block';
-            list.classList.add('show');
+    function toggleExtra() {
+        const list = document.getElementById('extra-list');
+        list.classList.toggle('show');
+    }
+
+    // --- EXPORT / IMPORT ---
+    function exportData() {
+        const data = JSON.stringify(progress);
+        const el = document.getElementById('backup-output');
+        el.style.display = 'block';
+        el.innerText = data;
+        alert("Kopiera texten som dök upp längst ner och spara i dina Anteckningar!");
+    }
+
+    function hardReset() {
+        if(confirm("Vill du radera allt?")) {
+            localStorage.clear();
+            location.reload();
         }
-    }
-
-    // --- UTILITIES ---
-    function formatTime(m) {
-        if(m >= 60) return (m/60).toFixed(1) + 'h';
-        return m + 'm';
-    }
-
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('clock').innerText = 
-            String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-        updateMeters(); // Uppdatera mätarna varje minut
     }
 
     // --- TIMER ---
@@ -380,10 +387,10 @@
     
     function startTimer(mins) {
         let sec = mins * 60;
-        const display = document.getElementById('timer-countdown');
+        const display = document.getElementById('timer-display');
+        document.getElementById('timer-controls').style.display = 'none'; // Göm knappar
         
         if(timerInt) clearInterval(timerInt);
-        
         timerInt = setInterval(() => {
             sec--;
             let m = Math.floor(sec / 60);
@@ -392,21 +399,21 @@
             
             if(sec <= 0) {
                 clearInterval(timerInt);
-                display.innerText = "KLART!";
-                const audio = new AudioContext(); // Simple beep
-                const osc = audio.createOscillator();
-                osc.connect(audio.destination);
-                osc.start();
-                osc.stop(audio.currentTime + 0.5);
-                alert("Tiden är ute!");
+                display.innerText = "DONE!";
+                display.style.color = "var(--gold)";
+                // Vibration/Ljud här om möjligt
             }
         }, 1000);
     }
 
-    // INIT
-    setInterval(updateClock, 60000); // Uppdatera varje minut
-    updateClock();
-    rollJoker(); // Slumpa en joker vid start
+    // START
+    setInterval(() => {
+        const d = new Date();
+        document.getElementById('clock').innerText = d.toTimeString().substr(0, 5);
+        updateMeters(Object.values(progress).reduce((a,b)=>a+b,0));
+    }, 1000);
+    
+    rollJoker();
     render();
 
 </script>
