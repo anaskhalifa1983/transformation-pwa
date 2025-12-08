@@ -355,8 +355,7 @@
 
     // --- STATE MANAGER ---
     let history = JSON.parse(localStorage.getItem('khalifa_v11_hist')) || {};
-    // MULTI-SESSION STATE
-    // Format: { 'yt_long': { state: 'running'|'paused', accumulated: 1200, lastTick: 123456 }, ... }
+    // SESSIONS: { 'yt_long': { accumulated: 0, state: 'running'|'paused', startTime: 123456 }, ... }
     let sessions = JSON.parse(localStorage.getItem('khalifa_v11_sessions')) || {};
     let workGoal = parseInt(localStorage.getItem('khalifa_v11_goal')) || 840; 
     
@@ -442,14 +441,23 @@
             }
 
             // CALC DATA
-            const totalMins = todayData[p.id] || 0; // Committed
-            const session = sessions[p.id]; // Active/Paused
+            const totalMins = todayData[p.id] || 0; // Committed history
+            const session = sessions[p.id]; // Active/Paused session
             
             const isRunning = session && session.state === 'running';
             const isPaused = session && session.state === 'paused';
             
-            // Pending mins (i buffert)
-            const pendingMins = session ? Math.floor(session.accumulated / 60000) : 0;
+            // Calculate pending time (buffer)
+            let pendingMins = 0;
+            if (session) {
+                if (isRunning) {
+                    const elapsed = Date.now() - session.startTime;
+                    pendingMins = Math.floor((session.accumulated + elapsed) / 60000);
+                } else {
+                    pendingMins = Math.floor(session.accumulated / 60000);
+                }
+            }
+
             const combinedMins = totalMins + pendingMins;
             const progressPct = Math.min(100, (combinedMins / p.target) * 100);
             
@@ -474,7 +482,7 @@
 
             if(isRunning) {
                 timeTxt = "REC...";
-            } else if(isPaused) {
+            } else if(isPaused && pendingMins > 0) {
                 pendingTxt = `+${pendingMins}m PÅGÅR`;
             }
 
@@ -519,7 +527,14 @@
         projects.forEach(p => {
             let m = d[p.id] || 0;
             // Lägg till pågående sessions i totalen
-            if(sessions[p.id]) m += Math.floor(sessions[p.id].accumulated / 60000);
+            if(sessions[p.id]) {
+                if(sessions[p.id].state === 'running') {
+                    const elapsed = Date.now() - sessions[p.id].startTime;
+                    m += Math.floor((sessions[p.id].accumulated + elapsed) / 60000);
+                } else {
+                    m += Math.floor(sessions[p.id].accumulated / 60000);
+                }
+            }
             
             total += m;
             if(m >= p.target) doneCount++;
@@ -541,7 +556,14 @@
         let total = 0;
         projects.filter(p => p.prio <= 3).forEach(p => {
             let m = d[p.id] || 0;
-            if(sessions[p.id]) m += Math.floor(sessions[p.id].accumulated / 60000);
+            if(sessions[p.id]) {
+                if(sessions[p.id].state === 'running') {
+                    const elapsed = Date.now() - sessions[p.id].startTime;
+                    m += Math.floor((sessions[p.id].accumulated + elapsed) / 60000);
+                } else {
+                    m += Math.floor(sessions[p.id].accumulated / 60000);
+                }
+            }
             total += m;
         });
         
@@ -558,43 +580,30 @@
         circle.style.stroke = color;
     }
 
-    // --- MULTI-SESSION LOGIC (V11 ENGINE) ---
+    // --- MULTI-SESSION LOGIC (V11) ---
     function toggleTask(id, e) {
         if(e) e.stopPropagation();
         vibrate(20);
         const now = Date.now();
         
-        // 1. Hantera den klickade uppgiften
         if (sessions[id]) {
             if (sessions[id].state === 'running') {
-                // PAUSA
-                sessions[id].accumulated += (now - sessions[id].lastTick);
+                // PAUSA DETTA PROJEKT (Påverkar ej andra)
+                sessions[id].accumulated += (now - sessions[id].startTime);
                 sessions[id].state = 'paused';
-                sessions[id].lastTick = null;
+                sessions[id].startTime = null;
             } else if (sessions[id].state === 'paused') {
-                // FORTSÄTT -> Pausa alla andra aktiva först
-                pauseAllRunning(now);
+                // FORTSÄTT DETTA PROJEKT (Påverkar ej andra)
                 sessions[id].state = 'running';
-                sessions[id].lastTick = now;
+                sessions[id].startTime = now;
             }
         } else {
-            // NY SESSION -> Pausa alla andra aktiva först
-            pauseAllRunning(now);
-            sessions[id] = { accumulated: 0, state: 'running', lastTick: now };
+            // NY SESSION (Startar parallellt med andra)
+            sessions[id] = { accumulated: 0, state: 'running', startTime: now };
         }
         
         saveState();
         render();
-    }
-
-    function pauseAllRunning(now) {
-        Object.keys(sessions).forEach(key => {
-            if (sessions[key].state === 'running') {
-                sessions[key].accumulated += (now - sessions[key].lastTick);
-                sessions[key].state = 'paused';
-                sessions[key].lastTick = null;
-            }
-        });
     }
 
     function stopTask(id, e) {
@@ -606,7 +615,7 @@
         // Räkna ut slutgiltig tid
         let finalSession = 0;
         if(sessions[id].state === 'running') {
-            finalSession = Date.now() - sessions[id].lastTick;
+            finalSession = Date.now() - sessions[id].startTime;
         }
         
         const totalMs = sessions[id].accumulated + finalSession;
@@ -663,7 +672,7 @@
         document.querySelectorAll('.task-card').forEach(c => c.classList.remove('pressing'));
     }
 
-    // --- LIVE LOOP (V11) ---
+    // --- LIVE LOOP (V11 MULTI) ---
     setInterval(() => {
         const now = new Date();
         document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -671,7 +680,8 @@
         // Uppdatera alla RUNNING sessions
         Object.keys(sessions).forEach(id => {
             if(sessions[id].state === 'running') {
-                const ms = sessions[id].accumulated + (Date.now() - sessions[id].lastTick);
+                const elapsed = Date.now() - sessions[id].startTime;
+                const ms = sessions[id].accumulated + elapsed;
                 const totalSec = Math.floor(ms/1000);
                 const txt = `${Math.floor(totalSec/60)}:${String(totalSec%60).padStart(2,'0')}`;
                 
@@ -682,8 +692,7 @@
     }, 1000);
 
     // --- SETTINGS, TOAST, STATS, UTILS (Standard) ---
-    // (Samma som V10 förutom små tweaks)
-
+    
     function updateGoal(val) {
         workGoal = parseInt(val);
         document.getElementById('goal-display').innerText = formatTime(workGoal);
