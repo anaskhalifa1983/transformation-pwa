@@ -3,544 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anas Master Dashboard</title>
+    <title>Anas Visual Dashboard v4</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
+            --bg-color: #0d0d0d;
+            --card-bg: #1a1a1a;
             --text-main: #ffffff;
-            --text-muted: #b0b0b0;
+            --text-muted: #888;
             
-            /* Tydliga färger för ADHD-hjärnan */
-            --prio1-color: #ff5252; /* Röd - AKUT/VIKTIGT */
-            --prio1-bg: #2a1a1a;
+            /* Samma färgschema för igenkänning */
+            --prio1: #ff5252; /* Röd */
+            --prio2: #ff9800; /* Orange */
+            --prio3: #2196f3; /* Blå */
+            --prio46: #9c27b0; /* Lila/Blandat för strategi */
             
-            --prio2-color: #ff9800; /* Orange - ENERGI */
-            --prio2-bg: #2a2010;
-            
-            --prio3-color: #2196f3; /* Blå - LUGN/BAS */
-            --prio3-bg: #101a2a;
-            
-            --prio4-color: #9c27b0; /* Lila - KREATIVT/VECKA */
-            --prio4-bg: #22102a;
-            
-            --prio5-color: #009688; /* Teal - BALANS/PERIOD */
-            --prio5-bg: #102522;
-            
-            --prio6-color: #607d8b; /* Grå - STRATEGI/FRAMTID */
-            --prio6-bg: #1a1a1a;
+            --day-bar-bg: #333;
+            --day-bar-fill: #e0e0e0;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 15px;
-            padding-bottom: 100px; /* Plats för scroll */
+            padding: 10px;
+            padding-top: 140px; /* Plats för den fasta toppen */
+            padding-bottom: 50px;
         }
 
-        /* --- TOPP: KLOCKA & TIMER --- */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* --- DEN FASTA TOPPEN (DASHBOARD) --- */
+        .fixed-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
             background-color: #000;
             padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            border-bottom: 2px solid #333;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
         }
 
-        .clock-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            font-variant-numeric: tabular-nums;
-            color: #fff;
-        }
-
-        .timer-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            font-variant-numeric: tabular-nums;
-            color: var(--prio2-color);
-            cursor: pointer;
-        }
-        
-        .timer-controls {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .timer-btn {
-            background: #333;
-            border: 1px solid #555;
-            color: white;
-            font-size: 0.8rem;
-            padding: 5px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .timer-active { animation: pulse 2s infinite; color: #ff5252; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .alarm-flash {
-            animation: flashScreen 1s infinite;
-        }
-        @keyframes flashScreen {
-            0% { background-color: var(--bg-color); }
-            50% { background-color: #500; }
-            100% { background-color: var(--bg-color); }
-        }
-
-        /* --- SEKTIONER --- */
-        .section-header {
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            cursor: pointer;
+        .top-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-        }
-
-        /* Färgkodning av headers */
-        .h-p1 { background: var(--prio1-bg); border-left: 6px solid var(--prio1-color); color: #ffcccc; }
-        .h-p2 { background: var(--prio2-bg); border-left: 6px solid var(--prio2-color); color: #ffe0b2; }
-        .h-p3 { background: var(--prio3-bg); border-left: 6px solid var(--prio3-color); color: #bbdefb; }
-        .h-p4 { background: var(--prio4-bg); border-left: 6px solid var(--prio4-color); color: #e1bee7; }
-        .h-p5 { background: var(--prio5-bg); border-left: 6px solid var(--prio5-color); color: #b2dfdb; }
-        .h-p6 { background: var(--prio6-bg); border-left: 6px solid var(--prio6-color); color: #cfd8dc; }
-
-        .helper-text {
-            font-size: 0.85rem;
-            color: var(--text-muted);
             margin-bottom: 10px;
-            padding-left: 10px;
-            font-style: italic;
         }
 
-        .project-list { display: none; margin-bottom: 20px; }
-        .project-list.open { display: block; }
+        .clock { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; }
+        .timer-btn { 
+            background: #222; border: 1px solid var(--prio2); color: var(--prio2);
+            padding: 5px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;
+        }
 
-        /* --- PROJEKT KORT --- */
-        .project-card {
-            background-color: var(--card-bg);
+        /* MÄTARE A: 17 TIMMARS DAGEN */
+        .meter-label { font-size: 0.75rem; color: #888; display: flex; justify-content: space-between; margin-bottom: 3px;}
+        .meter-track {
+            background: #222; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;
+        }
+        .meter-fill-time {
+            height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+            width: 0%; transition: width 1s linear;
+        }
+        
+        /* MÄTARE B: DIN INSATS (WORK) */
+        .meter-fill-work {
+            height: 100%; background: linear-gradient(90deg, #2196f3, #9c27b0);
+            width: 0%; transition: width 0.5s ease;
+        }
+
+        /* --- JOKER SEKTIONEN (PRIO 4-6) --- */
+        .joker-section {
+            background: linear-gradient(135deg, #22102a 0%, #1a1a1a 100%);
+            border: 1px solid var(--prio46);
             border-radius: 8px;
             padding: 15px;
-            margin-bottom: 12px;
-            border-left: 3px solid #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            text-align: center;
         }
+        
+        .joker-title { color: var(--prio46); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .joker-card-display { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; }
+        
+        .joker-controls { display: flex; gap: 10px; justify-content: center; }
+        .btn-outline { background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 12px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+        .btn-outline:active { background: #333; }
 
-        /* Färga korten svagt baserat på prio för tydlighet */
-        .card-p1 { border-left-color: var(--prio1-color); background: linear-gradient(90deg, #1e1e1e 0%, #2a1a1a 100%); }
-        .card-p2 { border-left-color: var(--prio2-color); background: linear-gradient(90deg, #1e1e1e 0%, #2a2010 100%); }
-        .card-p3 { border-left-color: var(--prio3-color); background: linear-gradient(90deg, #1e1e1e 0%, #101a2a 100%); }
+        /* LISTA FÖR PRIO 4-6 (Dold som default) */
+        .extra-list { display: none; text-align: left; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
+        .extra-list.show { display: block; animation: fadeIn 0.3s; }
 
-        .project-header {
+        /* --- HUVUDLISTOR (PRIO 1-3) --- */
+        .zone-header {
+            padding: 12px; border-radius: 8px; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: bold; font-size: 1.1rem; cursor: pointer;
+        }
+        
+        .z1 { background: #2a1a1a; border-left: 5px solid var(--prio1); color: #ffcccc; }
+        .z2 { background: #2a2010; border-left: 5px solid var(--prio2); color: #ffe0b2; }
+        .z3 { background: #101a2a; border-left: 5px solid var(--prio3); color: #bbdefb; }
+
+        .project-container { display: block; margin-bottom: 20px; } /* Alltid öppna för överblick, eller toggla */
+        
+        .task-row {
+            background: var(--card-bg);
+            border-bottom: 1px solid #222;
+            padding: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
         }
+        .task-info { flex-grow: 1; }
+        .task-name { font-size: 0.95rem; display: block; }
+        .task-meta { font-size: 0.75rem; color: #666; }
         
-        .project-title { font-weight: bold; font-size: 1rem; }
-        .status-badge { font-size: 0.8rem; font-family: monospace; background: #000; padding: 2px 6px; border-radius: 4px; color: #fff; }
-
-        .project-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            line-height: 1.4;
+        .task-actions { display: flex; gap: 5px; }
+        .btn-add {
+            background: #333; border: none; color: white;
+            width: 40px; height: 30px; border-radius: 4px;
+            font-weight: bold; cursor: pointer;
         }
+        .btn-add:active { background: #fff; color: #000; }
 
-        .progress-track {
-            background-color: #333;
-            height: 14px; /* Tjockare för tydlighet */
-            border-radius: 7px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
+        /* Timer Modal */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #222; padding: 20px; border-radius: 10px; width: 80%; text-align: center; border: 2px solid var(--prio2); }
 
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .action-row {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .log-btn {
-            background-color: #424242;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: transform 0.1s, background 0.2s;
-        }
-
-        .log-btn:active { transform: scale(0.95); }
-        .log-btn.done { background-color: #2e7d32; color: #a5d6a7; } /* Grön när man trycker */
-
-        .arrow { transition: transform 0.3s; font-size: 0.8rem; opacity: 0.7; }
-        .open .arrow { transform: rotate(180deg); }
-
-        /* Timer Modal overlay */
-        .timer-modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #222;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid var(--prio2-color);
-            z-index: 200;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            width: 80%;
-        }
-        .timer-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 150;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .flash { animation: flash 0.5s; }
+        @keyframes flash { 0% { background-color: #333; } 50% { background-color: #4caf50; } 100% { background-color: #333; } }
 
     </style>
 </head>
 <body>
 
-    <!-- TOPP BAR MED KLOCKA & TIMER -->
-    <div class="top-bar">
-        <div class="clock-display" id="clock">00:00</div>
+    <!-- FASTA TOPPEN -->
+    <div class="fixed-header">
+        <div class="top-row">
+            <div class="clock" id="clock">00:00</div>
+            <button class="timer-btn" onclick="openTimer()">⏳ TIMER</button>
+        </div>
+
+        <!-- MÄTARE 1: DAGEN (TID) -->
+        <div class="meter-label">
+            <span>Dagens 17 Timmar</span>
+            <span id="day-percent">0%</span>
+        </div>
+        <div class="meter-track">
+            <div class="meter-fill-time" id="day-bar"></div>
+        </div>
+
+        <!-- MÄTARE 2: INSATS (JOBB) -->
+        <div class="meter-label">
+            <span>Din Insats (Mål: 14h)</span>
+            <span id="work-percent">0%</span>
+        </div>
+        <div class="meter-track">
+            <div class="meter-fill-work" id="work-bar"></div>
+        </div>
+    </div>
+
+    <!-- JOKER SEKTIONEN (PRIO 4-6) -->
+    <div class="joker-section">
+        <div class="joker-title">🟣 DAGENS FÖRSLAG (Prio 4-6)</div>
+        <div class="joker-card-display" id="joker-display">Laddar...</div>
         
-        <div style="text-align: right;">
-            <div style="font-size: 0.7rem; color: #aaa; margin-bottom: 2px;">FOKUS TIMER</div>
-            <div class="timer-display" id="timerDisplay" onclick="openTimerMenu()">00:00</div>
+        <div class="joker-controls">
+            <button class="btn-outline" onclick="rollJoker()">🎲 Slumpa Ny</button>
+            <button class="btn-outline" onclick="toggleExtraList()">📋 VISA ALLA</button>
+        </div>
+
+        <!-- DEN GÖMDA LISTAN -->
+        <div class="extra-list" id="extra-list-container">
+            <!-- Här hamnar alla Prio 4, 5, 6 -->
         </div>
     </div>
 
-    <!-- TIMER MENY (Popup) -->
-    <div class="timer-overlay" id="timerOverlay" onclick="closeTimerMenu()"></div>
-    <div class="timer-modal" id="timerMenu">
-        <h3 style="margin-top:0;">Sätt Timer</h3>
-        <p style="color:#aaa; font-size: 0.9rem;">Välj tid, starta, och JOBBA tills det piper.</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <button class="log-btn" onclick="startTimer(15)">15 min</button>
-            <button class="log-btn" onclick="startTimer(30)">30 min</button>
-            <button class="log-btn" onclick="startTimer(45)">45 min</button>
-            <button class="log-btn" onclick="startTimer(60)">60 min</button>
+    <!-- ZON 1: TUNG -->
+    <div class="zone-header z1">🔴 PRIO 1: TUNG (Max 6h)</div>
+    <div class="project-container" id="list-prio1"></div>
+
+    <!-- ZON 2: BALANS -->
+    <div class="zone-header z2">🟠 PRIO 2: BALANS (Max 4h)</div>
+    <div class="project-container" id="list-prio2"></div>
+
+    <!-- ZON 3: GRUND -->
+    <div class="zone-header z3">🔵 PRIO 3: GRUND (Max 4h)</div>
+    <div class="project-container" id="list-prio3"></div>
+
+
+    <!-- TIMER MODAL -->
+    <div class="modal-overlay" id="timer-overlay">
+        <div class="modal">
+            <h2>Fokus Timer</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                <button class="btn-outline" onclick="startTimer(15)">15 min</button>
+                <button class="btn-outline" onclick="startTimer(30)">30 min</button>
+                <button class="btn-outline" onclick="startTimer(45)">45 min</button>
+                <button class="btn-outline" onclick="startTimer(60)">60 min</button>
+            </div>
+            <button class="btn-outline" style="width:100%; border-color:#f44336; color:#f44336" onclick="closeTimer()">Avbryt</button>
+            <div id="timer-countdown" style="font-size: 2rem; margin-top: 15px; font-weight:bold;"></div>
         </div>
-        <button class="log-btn" style="background: #b71c1c; width: 100%;" onclick="resetTimer()">Stoppa / Återställ</button>
-    </div>
-
-    <h1>Anas Dashboard v3</h1>
-
-    <!-- PRIO 1 -->
-    <div class="section-header h-p1" onclick="toggleSection('prio1')">
-        <span>🔴 PRIO 1: TUNG (Daglig)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div class="helper-text">
-        Ditt levebröd & tillväxt. Gör <b>minst en</b> sak här, upp till 6 timmar.
-    </div>
-    <div id="prio1" class="project-list open"></div>
-
-    <!-- PRIO 2 -->
-    <div class="section-header h-p2" onclick="toggleSection('prio2')">
-        <span>🟠 PRIO 2: BALANS (Daglig)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div class="helper-text">
-        Relationer & Hälsa. Utan detta kraschar du. Balansera dagen med ca 4h.
-    </div>
-    <div id="prio2" class="project-list"></div>
-
-    <!-- PRIO 3 -->
-    <div class="section-header h-p3" onclick="toggleSection('prio3')">
-        <span>🔵 PRIO 3: GRUND (Daglig)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div class="helper-text">
-        Bön, Mat, Lärande. Små stunder som håller grunden stark. Sprid ut dem.
-    </div>
-    <div id="prio3" class="project-list"></div>
-
-    <!-- PRIO 4 -->
-    <div class="section-header h-p4" onclick="toggleSection('prio4')">
-        <span>🟣 PRIO 4: VECKOVIS (1ggr/v)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div class="helper-text">
-        Välj <b>en</b> av dessa per vecka eller när "Jokern" dyker upp.
-    </div>
-    <div id="prio4" class="project-list"></div>
-
-    <!-- PRIO 5 -->
-    <div class="section-header h-p5" onclick="toggleSection('prio5')">
-        <span>🟢 PRIO 5: VARANNAN VECKA</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div id="prio5" class="project-list"></div>
-
-    <!-- PRIO 6 -->
-    <div class="section-header h-p6" onclick="toggleSection('prio6')">
-        <span>⚪ PRIO 6: MÅNADSVIS (Strategi)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div id="prio6" class="project-list"></div>
-
-    <div style="text-align: center; margin-top: 50px; opacity: 0.4;">
-        <button onclick="hardReset()" style="background: #333; border: 1px solid #555; color: #888; padding: 5px 10px; border-radius: 4px;">⚠ Nollställ ALL DATA</button>
     </div>
 
 <script>
-    // --- LJUD FÖR TIMER (BEEP) ---
-    // Enkel oscillator beep som funkar i moderna webbläsare utan externa filer
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playAlarm() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.type = 'square';
-        oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.5); // A5
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 1);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 1);
+    // --- KONFIGURATION ---
+    const WAKE_TIME = 7; // Klockan 07:00 börjar mätaren
+    const SLEEP_TIME = 24; // Klockan 00:00 slutar mätaren (24 = midnatt)
+    const TOTAL_DAY_HOURS = SLEEP_TIME - WAKE_TIME; // 17 timmar
+    const TOTAL_WORK_GOAL_MINUTES = 14 * 60; // 14 timmar mål
+
+    // --- PROJEKT DATA ---
+    const projects = [
+        // PRIO 1
+        { id: 'yt_long', title: 'YouTube Lång', meta: 'Batch-inspelning / Planering', prio: 1 },
+        { id: 'yt_short', title: 'YouTube Kort', meta: 'Shorts / Reels / Klipp', prio: 1 },
+        
+        // PRIO 2
+        { id: 'social', title: 'Social Media', meta: 'Community & Text', prio: 2 },
+        { id: 'fam_act', title: 'Familjeaktivitet', meta: 'Lek / Utflykt', prio: 2 },
+        { id: 'azzah', title: 'Azzah Tid', meta: 'Relation & Stöd', prio: 2 },
+        { id: 'kids', title: 'Barn 1-mot-1', meta: 'Fokus tid', prio: 2 },
+        { id: 'health', title: 'Hälsa', meta: 'Promenad / Vila', prio: 2 },
+
+        // PRIO 3
+        { id: 'prayer', title: 'Bön & Adhkar', meta: 'Andlighet', prio: 3 },
+        { id: 'meals', title: 'Mat & Hus', meta: 'Gemenskap & Drift', prio: 3 },
+        { id: 'autobio', title: 'Bok: Självbiografi', meta: 'Skriv lite', prio: 3 },
+        { id: 'learning', title: 'Lärande', meta: 'Lyssna / Läsa', prio: 3 },
+
+        // PRIO 4-6 (Dessa hamnar i "Joker" eller "Visa alla")
+        { id: 'thriller', title: 'Bok: Deckare', meta: 'Prio 4 (Vecka)', prio: 4 },
+        { id: 'biz', title: 'Business/Merch', meta: 'Prio 4 (Vecka)', prio: 4 },
+        { id: 'prep', title: 'Meal Prep', meta: 'Prio 4 (Vecka)', prio: 4 },
+        { id: 'coach', title: 'Coaching Plattform', meta: 'Prio 5 (Varannan)', prio: 5 },
+        { id: 'azzah_biz', title: 'Azzah Business', meta: 'Prio 5 (Varannan)', prio: 5 },
+        { id: 'strategy', title: 'Strategi & Framtid', meta: 'Prio 6 (Månad)', prio: 6 },
+        { id: 'ai', title: 'AI & Tech', meta: 'Prio 6 (Månad)', prio: 6 }
+    ];
+
+    // --- STATE ---
+    let progress = JSON.parse(localStorage.getItem('anasProgressV4')) || {};
+    let totalMinutesToday = 0;
+
+    // Räkna total tid vid start
+    for(let key in progress) {
+        // Enkel reset-logik: Vi nollställer manuellt "work meter" varje dag i koden nedan
+        // För enkelhetens skull i denna visuella version sparar vi dagens total
+    }
+    
+    // Check Reset (Enkel daglig reset av mätare)
+    const lastDate = localStorage.getItem('anasDate');
+    const todayStr = new Date().toDateString();
+    if(lastDate !== todayStr) {
+        progress = {}; // Nollställ allt ny dag
+        localStorage.setItem('anasDate', todayStr);
+        localStorage.setItem('anasProgressV4', JSON.stringify(progress));
     }
 
-    // --- KLOCKA & TIMER LOGIK ---
-    let timerInterval;
-    let timeLeft = 0; // sekunder
+    // --- RENDER FUNCTION ---
+    function render() {
+        // Uppdatera totalen
+        totalMinutesToday = Object.values(progress).reduce((a, b) => a + b, 0);
+        
+        // 1. Render Prio 1-3 Lists
+        renderZone(1, 'list-prio1');
+        renderZone(2, 'list-prio2');
+        renderZone(3, 'list-prio3');
+
+        // 2. Render Extra List (Prio 4-6)
+        const extraContainer = document.getElementById('extra-list-container');
+        extraContainer.innerHTML = '';
+        projects.filter(p => p.prio >= 4).forEach(p => {
+            extraContainer.innerHTML += createRow(p);
+        });
+
+        // 3. Update Meters
+        updateMeters();
+    }
+
+    function renderZone(prio, elementId) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+        projects.filter(p => p.prio === prio).forEach(p => {
+            container.innerHTML += createRow(p);
+        });
+    }
+
+    function createRow(p) {
+        const mins = progress[p.id] || 0;
+        const timeStr = mins > 0 ? `<span style="color:var(--prio2); font-weight:bold;">${formatTime(mins)}</span>` : '';
+        
+        return `
+            <div class="task-row">
+                <div class="task-info">
+                    <span class="task-name">${p.title} ${timeStr}</span>
+                    <span class="task-meta">${p.meta}</span>
+                </div>
+                <div class="task-actions">
+                    <button class="btn-add" onclick="addTime('${p.id}', 15)">15</button>
+                    <button class="btn-add" onclick="addTime('${p.id}', 30)">30</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function addTime(id, amount) {
+        if(!progress[id]) progress[id] = 0;
+        progress[id] += amount;
+        localStorage.setItem('anasProgressV4', JSON.stringify(progress));
+        render();
+    }
+
+    // --- MÄTARE LOGIK ---
+    function updateMeters() {
+        // 1. Time Meter (Day Progress)
+        const now = new Date();
+        const currentHour = now.getHours() + (now.getMinutes()/60);
+        let dayPct = 0;
+        
+        if(currentHour >= WAKE_TIME && currentHour < SLEEP_TIME) {
+            dayPct = ((currentHour - WAKE_TIME) / TOTAL_DAY_HOURS) * 100;
+        } else if (currentHour >= SLEEP_TIME) {
+            dayPct = 100;
+        }
+        
+        document.getElementById('day-bar').style.width = `${Math.min(dayPct, 100)}%`;
+        document.getElementById('day-percent').innerText = `${Math.round(dayPct)}%`;
+
+        // Färga stapeln röd om dagen börjar ta slut
+        const bar = document.getElementById('day-bar');
+        if(dayPct > 80) bar.style.background = '#f44336'; // Röd
+        else if(dayPct > 50) bar.style.background = '#ffeb3b'; // Gul
+
+        // 2. Work Meter
+        const workPct = (totalMinutesToday / TOTAL_WORK_GOAL_MINUTES) * 100;
+        document.getElementById('work-bar').style.width = `${Math.min(workPct, 100)}%`;
+        document.getElementById('work-percent').innerText = `${formatTime(totalMinutesToday)}`;
+    }
+
+    // --- JOKER LOGIK ---
+    function rollJoker() {
+        const extras = projects.filter(p => p.prio >= 4);
+        const random = extras[Math.floor(Math.random() * extras.length)];
+        document.getElementById('joker-display').innerText = random.title;
+    }
+
+    function toggleExtraList() {
+        const list = document.getElementById('extra-list-container');
+        if(list.style.display === 'block') {
+            list.style.display = 'none';
+        } else {
+            list.style.display = 'block';
+            list.classList.add('show');
+        }
+    }
+
+    // --- UTILITIES ---
+    function formatTime(m) {
+        if(m >= 60) return (m/60).toFixed(1) + 'h';
+        return m + 'm';
+    }
 
     function updateClock() {
         const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('clock').textContent = `${hours}:${minutes}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    function openTimerMenu() {
-        document.getElementById('timerOverlay').style.display = 'block';
-        document.getElementById('timerMenu').style.display = 'block';
+        document.getElementById('clock').innerText = 
+            String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        updateMeters(); // Uppdatera mätarna varje minut
     }
 
-    function closeTimerMenu() {
-        document.getElementById('timerOverlay').style.display = 'none';
-        document.getElementById('timerMenu').style.display = 'none';
-    }
-
-    function startTimer(minutes) {
-        closeTimerMenu();
-        if (timerInterval) clearInterval(timerInterval);
-        timeLeft = minutes * 60;
-        updateTimerDisplay();
-        document.querySelector('.timer-display').classList.add('timer-active');
-        document.body.classList.remove('alarm-flash');
-
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            updateTimerDisplay();
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                document.querySelector('.timer-display').classList.remove('timer-active');
-                document.body.classList.add('alarm-flash'); // Blinkar rött
-                playAlarm();
-                // Spela alarm 3 gånger
-                setTimeout(playAlarm, 1000);
-                setTimeout(playAlarm, 2000);
-                alert("TIDEN ÄR UTE! Logga ditt arbete.");
-                document.body.classList.remove('alarm-flash');
+    // --- TIMER ---
+    let timerInt;
+    function openTimer() { document.getElementById('timer-overlay').style.display = 'block'; }
+    function closeTimer() { document.getElementById('timer-overlay').style.display = 'none'; clearInterval(timerInt); }
+    
+    function startTimer(mins) {
+        let sec = mins * 60;
+        const display = document.getElementById('timer-countdown');
+        
+        if(timerInt) clearInterval(timerInt);
+        
+        timerInt = setInterval(() => {
+            sec--;
+            let m = Math.floor(sec / 60);
+            let s = sec % 60;
+            display.innerText = `${m}:${String(s).padStart(2,'0')}`;
+            
+            if(sec <= 0) {
+                clearInterval(timerInt);
+                display.innerText = "KLART!";
+                const audio = new AudioContext(); // Simple beep
+                const osc = audio.createOscillator();
+                osc.connect(audio.destination);
+                osc.start();
+                osc.stop(audio.currentTime + 0.5);
+                alert("Tiden är ute!");
             }
         }, 1000);
     }
 
-    function resetTimer() {
-        if (timerInterval) clearInterval(timerInterval);
-        timeLeft = 0;
-        updateTimerDisplay();
-        document.querySelector('.timer-display').classList.remove('timer-active');
-        document.body.classList.remove('alarm-flash');
-        closeTimerMenu();
-    }
-
-    function updateTimerDisplay() {
-        const m = Math.floor(timeLeft / 60);
-        const s = timeLeft % 60;
-        document.getElementById('timerDisplay').textContent = 
-            `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-
-    // --- PROJEKTDATA (DINA PROJEKT) ---
-    const projects = [
-        // PRIO 1
-        { id: 'yt_long', title: 'YouTube Lång', desc: 'Inspelning (Batch) eller Planering. Din huvudmotor.', prio: 1, target: 360 },
-        { id: 'yt_short', title: 'YouTube Kort', desc: 'Shorts, Reels, Klippning. Spridning.', prio: 1, target: 360 },
-        
-        // PRIO 2
-        { id: 'social', title: 'Social Media', desc: 'Instagram text, Community vård.', prio: 2, target: 240 },
-        { id: 'fam_act', title: 'Familjeaktivitet', desc: 'Spel, promenad, närvaro.', prio: 2, target: 240 },
-        { id: 'azzah', title: 'Tid med Azzah', desc: 'Relation, samtal, stöd.', prio: 2, target: 240 },
-        { id: 'kids', title: 'Barn En-mot-En', desc: 'Fokus på ett barn i taget.', prio: 2, target: 240 },
-        { id: 'health', title: 'Hälsa/Återhämtning', desc: 'Promenad, vila, andas.', prio: 2, target: 240 },
-
-        // PRIO 3
-        { id: 'prayer', title: 'Bön & Adhkar', desc: 'Fajr, Koran, Kontakt med Allah.', prio: 3, target: 60 },
-        { id: 'meals', title: 'Mat & Teamwork', desc: 'Äta tillsammans, hjälpa till hemma.', prio: 3, target: 60 },
-        { id: 'autobio', title: 'Bok: Självbiografi', desc: 'Skriv några rader. Dokumentera resan.', prio: 3, target: 60 },
-        { id: 'learning', title: 'Lärande', desc: 'Ljudbok, läsa, research.', prio: 3, target: 60 },
-
-        // PRIO 4 (Veckovis)
-        { id: 'thriller', title: 'Bok: Deckare', desc: 'Skrivande fiktion.', prio: 4, target: 60 },
-        { id: 'podcast', title: 'Podcast', desc: 'Planering/Inspelning.', prio: 4, target: 60 },
-        { id: 'biz', title: 'Business & Merch', desc: 'Starta upp online-business.', prio: 4, target: 60 },
-        { id: 'prep', title: 'Meal Prep', desc: 'Storkok/Planering.', prio: 4, target: 120 },
-
-        // PRIO 5 & 6 (Blandat för enkelhet)
-        { id: 'coach', title: 'Coaching', desc: 'ADHD/Familj coach plattform.', prio: 5, target: 60 },
-        { id: 'azzah_biz', title: 'Azzah Business', desc: 'Hjälp med strategi/site.', prio: 5, target: 60 },
-        { id: 'ai_tech', title: 'AI & Framtid', desc: 'SaaS, Tech research.', prio: 6, target: 60 },
-        { id: 'strategy', title: 'Strategi', desc: 'Långsiktig planering.', prio: 6, target: 60 },
-        { id: 'event', title: 'Events', desc: 'Planera workshops.', prio: 6, target: 60 }
-    ];
-
-    // --- DATA HANTERING ---
-    let progressData = JSON.parse(localStorage.getItem('anasProgressV3')) || {};
-    let lastReset = JSON.parse(localStorage.getItem('anasResetsV3')) || { daily: 0, weekly: 0 };
-
-    function saveData() {
-        localStorage.setItem('anasProgressV3', JSON.stringify(progressData));
-        localStorage.setItem('anasResetsV3', JSON.stringify(lastReset));
-        render();
-    }
-
-    function checkResets() {
-        const now = new Date();
-        const todayStr = now.toDateString();
-        // Veckonummer
-        const onejan = new Date(now.getFullYear(), 0, 1);
-        const weekNum = Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-
-        let hasChanged = false;
-
-        // Daglig reset (Prio 1-3)
-        if (lastReset.daily !== todayStr) {
-            projects.forEach(p => { if (p.prio <= 3) progressData[p.id] = 0; });
-            lastReset.daily = todayStr;
-            hasChanged = true;
-        }
-        // Veckovis reset (Prio 4-6) - Nollställs varje måndag (exempelvis)
-        if (lastReset.weekly !== weekNum) {
-            projects.forEach(p => { if (p.prio >= 4) progressData[p.id] = 0; });
-            lastReset.weekly = weekNum;
-            hasChanged = true;
-        }
-
-        if (hasChanged) saveData();
-    }
-
-    function render() {
-        ['prio1', 'prio2', 'prio3', 'prio4', 'prio5', 'prio6'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.innerHTML = '';
-        });
-
-        projects.forEach(p => {
-            const current = progressData[p.id] || 0;
-            const pct = Math.min((current / p.target) * 100, 100);
-            
-            // Hämta färgvariabel
-            let colorVar = `var(--prio${p.prio}-color)`;
-            let cardClass = `card-p${p.prio > 3 ? 3 : p.prio}`; // Använd P3 design för 4-6 för att spara CSS
-
-            const html = `
-                <div class="project-card ${cardClass}" style="border-left-color: ${colorVar}">
-                    <div class="project-header">
-                        <span class="project-title">${p.title}</span>
-                        <span class="status-badge">${formatTime(current)}</span>
-                    </div>
-                    <div class="project-desc">${p.desc}</div>
-                    <div class="progress-track">
-                        <div class="progress-fill" style="width: ${pct}%; background-color: ${colorVar};"></div>
-                    </div>
-                    <div class="action-row">
-                        <button class="log-btn" onclick="addTime('${p.id}', 15)">+15m</button>
-                        <button class="log-btn" onclick="addTime('${p.id}', 30)">+30m</button>
-                        <button class="log-btn" onclick="addTime('${p.id}', 60)">+1h</button>
-                    </div>
-                </div>
-            `;
-            
-            const container = document.getElementById('prio' + p.prio);
-            if(container) container.innerHTML += html;
-        });
-    }
-
-    function addTime(id, minutes) {
-        if (!progressData[id]) progressData[id] = 0;
-        progressData[id] += minutes;
-        
-        // Visuell feedback på knappen (grön flash)
-        const btn = event.target;
-        btn.classList.add('done');
-        setTimeout(() => btn.classList.remove('done'), 500);
-        
-        saveData();
-    }
-
-    function formatTime(minutes) {
-        if (minutes >= 60) {
-            const h = (minutes / 60).toFixed(1);
-            return `${h}h`;
-        }
-        return `${minutes}m`;
-    }
-
-    function toggleSection(id) {
-        const list = document.getElementById(id);
-        list.classList.toggle('open');
-        // Rotera pil
-        const header = document.querySelector(`.h-p${id.replace('prio','')}`);
-        if(list.classList.contains('open')) header.classList.add('open');
-        else header.classList.remove('open');
-    }
-
-    function hardReset() {
-        if(confirm("Är du säker? All statistik raderas.")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    // Start
-    checkResets();
+    // INIT
+    setInterval(updateClock, 60000); // Uppdatera varje minut
+    updateClock();
+    rollJoker(); // Slumpa en joker vid start
     render();
 
 </script>
