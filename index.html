@@ -5,26 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
-    <title>Khalifa Commander</title>
-    
-    <!-- Ikoner -->
+    <title>Khalifa Commander v7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
             --bg: #050505;
-            --card: #121212;
-            --active-card: #1a0f0f;
-            --text: #ffffff;
-            --muted: #666;
+            --card-bg: #141414;
+            --text: #fff;
             
-            --p1: #ff3b30; /* Röd */
-            --p2: #ff9500; /* Orange */
-            --p3: #007aff; /* Blå */
-            --p46: #af52de; /* Lila */
-            --gold: #ffd60a; 
+            /* WOW-GRADIENTS */
+            --p1-grad: linear-gradient(135deg, #ff3b30, #ff6b30);
+            --p2-grad: linear-gradient(135deg, #ff9500, #ffcc00);
+            --p3-grad: linear-gradient(135deg, #007aff, #00b4ff);
+            --p46-grad: linear-gradient(135deg, #5e5ce6, #bf5af2);
             
-            --nav-height: 70px;
+            --p1-glow: rgba(255, 59, 48, 0.3);
+            --gold: #ffd60a;
+            
+            --nav-height: 80px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -33,191 +32,210 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 0;
-            padding-top: 130px; /* Header space */
-            padding-bottom: var(--nav-height); /* Nav space */
-            user-select: none;
+            margin: 0; padding: 0;
+            padding-top: 180px; /* Plats för Header + Filter */
+            padding-bottom: 100px;
+            overscroll-behavior-y: none;
         }
 
         /* --- HEADER & RINGS --- */
         .fixed-header {
             position: fixed; top: 0; left: 0; right: 0;
-            background: rgba(5,5,5,0.95); backdrop-filter: blur(10px);
-            padding: 10px 20px; z-index: 100;
-            border-bottom: 1px solid #222;
-            display: flex; justify-content: space-between; align-items: center;
-            height: 120px;
-        }
-
-        .header-info h1 { margin: 0; font-size: 2rem; font-weight: 800; }
-        .header-info p { margin: 0; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
-
-        .rings-wrapper { display: flex; gap: 15px; }
-        .ring-container { position: relative; width: 60px; height: 60px; text-align: center; }
-        .ring-svg { transform: rotate(-90deg); width: 60px; height: 60px; }
-        .ring-bg { fill: none; stroke: #222; stroke-width: 5; }
-        .ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 150; stroke-dashoffset: 150; transition: stroke-dashoffset 1s ease; }
-        .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; }
-        .ring-label { font-size: 0.6rem; color: #666; margin-top: -5px; display: block; }
-
-        /* --- TABS NAVIGATION --- */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: var(--nav-height);
-            background: #111; border-top: 1px solid #222;
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 100;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+            z-index: 100; border-bottom: 1px solid #222;
         }
         
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #555; font-size: 0.7rem; width: 100%; height: 100%;
-            cursor: pointer; transition: color 0.2s;
+        .top-deck {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; height: 110px;
         }
-        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
-        .nav-item.active { color: var(--gold); background: #1a1a1a; }
 
-        /* --- VIEWS --- */
-        .view-section { display: none; padding: 15px; }
-        .view-section.active { display: block; animation: fadeIn 0.3s; }
+        .clock-area h1 { margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
+        .clock-area p { margin: 0; font-size: 0.8rem; color: #666; text-transform: uppercase; font-weight: 700; }
 
-        /* --- TASK CARDS (TODAY) --- */
-        .zone-title {
-            margin-top: 25px; margin-bottom: 10px; 
-            font-size: 0.9rem; font-weight: 700; color: #888; letter-spacing: 1px;
-            display: flex; align-items: center; gap: 8px;
+        /* FILTER BAR (Sticky under header) */
+        .filter-bar {
+            display: flex; gap: 10px; padding: 10px 20px;
+            border-top: 1px solid #1a1a1a; overflow-x: auto;
         }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        
+        .filter-pill {
+            background: #222; border: 1px solid #333; color: #888;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+            white-space: nowrap; cursor: pointer; transition: all 0.2s;
+        }
+        .filter-pill.active { background: #fff; color: #000; border-color: #fff; }
+
+        /* RINGS */
+        .rings { display: flex; gap: 15px; }
+        .ring-box { position: relative; width: 55px; height: 55px; }
+        .ring-svg { transform: rotate(-90deg); width: 55px; height: 55px; }
+        .ring-bg { fill: none; stroke: #222; stroke-width: 5; }
+        .ring-val { fill: none; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 140; stroke-dashoffset: 140; transition: stroke-dashoffset 1s; }
+        .ring-icon { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.2rem;}
+
+        /* --- CARDS DESIGN --- */
+        .zone-label {
+            margin: 30px 20px 10px 20px; font-size: 0.8rem; font-weight: 800; 
+            color: #555; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
+        }
+        .zone-line { flex-grow: 1; height: 1px; background: #222; }
 
         .task-card {
-            background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 10px;
-            border: 1px solid #1f1f1f; display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.3s;
+            background: var(--card-bg); margin: 0 20px 15px 20px; padding: 20px;
+            border-radius: 18px; border: 1px solid #222;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: transform 0.2s; position: relative; overflow: hidden;
         }
 
-        /* ACTIVE STATE (Recording) */
+        /* PRIO 1 SPECIAL STYLE (HERO) */
+        .prio-1 {
+            background: linear-gradient(145deg, #1a0505 0%, #0a0a0a 100%);
+            border: 1px solid #4a1a1a;
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .prio-1 .task-title { font-size: 1.2rem; font-weight: 800; }
+        .prio-1-border { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--p1-grad); }
+
+        /* PRIO 4-6 COMPACT STYLE */
+        .prio-low { padding: 15px 20px; opacity: 0.9; }
+        .prio-low .task-title { font-size: 0.9rem; }
+        .prio-low .btn-play { width: 45px; height: 45px; font-size: 1rem; }
+
+        /* STATES */
         .task-card.recording {
-            background: #2a1010; border-color: var(--p1);
-            box-shadow: 0 0 15px rgba(255, 59, 48, 0.2);
-            animation: pulse 2s infinite;
+            border-color: #ff3b30; background: #220a0a;
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.15);
+            animation: breathe 2s infinite;
         }
-        @keyframes pulse { 0% { border-color: var(--p1); } 50% { border-color: #500; } 100% { border-color: var(--p1); } }
+        @keyframes breathe { 0% { border-color: #ff3b30; } 50% { border-color: #800; } 100% { border-color: #ff3b30; } }
 
-        /* DONE STATE (Target Met) */
-        .task-card.done { border-color: var(--gold); }
         .task-card.done .task-title { color: var(--gold); }
+        .task-card.done { border-color: rgba(255, 214, 10, 0.3); }
 
-        .task-left { flex-grow: 1; }
-        .task-title { font-size: 1rem; font-weight: 600; display: block; }
-        .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+        /* TEXT & BUTTONS */
+        .task-info { flex-grow: 1; }
+        .task-title { font-size: 1rem; font-weight: 700; display: block; margin-bottom: 4px; }
+        .task-meta { font-size: 0.8rem; color: #666; }
         
-        .task-right { display: flex; align-items: center; gap: 15px; }
-        .time-badge { font-family: monospace; font-size: 0.9rem; background: #000; padding: 4px 8px; border-radius: 4px; color: #aaa; }
+        .task-action { display: flex; align-items: center; gap: 15px; }
         
-        /* PLAY BUTTON */
+        /* LIVE TIMER BADGE */
+        .timer-badge { 
+            font-family: monospace; font-size: 1rem; color: #888; 
+            background: #000; padding: 6px 10px; border-radius: 8px; min-width: 60px; text-align: center;
+        }
+        .recording .timer-badge { color: #ff3b30; font-weight: bold; background: #2a0000; }
+        .done .timer-badge { color: var(--gold); }
+
+        /* BIG PLAY BUTTON */
         .btn-play {
-            width: 45px; height: 45px; border-radius: 50%; border: none;
-            background: #222; color: #fff; font-size: 1.2rem;
+            width: 60px; height: 60px; border-radius: 50%; border: none;
+            background: #252525; color: #fff; font-size: 1.4rem;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.1s, background 0.2s;
+            cursor: pointer; transition: transform 0.1s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         .btn-play:active { transform: scale(0.9); }
+        .recording .btn-play { background: var(--p1-grad); animation: spin 4s linear infinite; }
         
-        .recording .btn-play { background: var(--p1); color: white; animation: rotateIcon 0s; }
-        .recording .time-badge { color: white; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* --- STATS VIEWS (WEEK/MONTH) --- */
-        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
-        .stat-bar-bg { height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
-        .stat-bar-fill { height: 100%; border-radius: 4px; }
-        
-        .total-summary { text-align: center; margin-bottom: 20px; }
-        .big-number { font-size: 2.5rem; font-weight: 800; color: var(--text); }
-        .big-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+        /* --- BOTTOM NAV --- */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+            background: #000; border-top: 1px solid #222;
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            padding-bottom: 10px; z-index: 200;
+        }
+        .nav-btn {
+            background: none; border: none; color: #555;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.7rem; gap: 5px;
+        }
+        .nav-btn.active { color: #fff; }
+        .nav-btn i { font-size: 1.4rem; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* CONFETTI CANVAS */
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+        /* UTILS */
+        .hidden { display: none !important; }
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeUp 0.3s; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
     </style>
 </head>
 <body>
 
+    <canvas id="confetti"></canvas>
+
     <!-- HEADER -->
     <div class="fixed-header">
-        <div class="header-info">
-            <h1 id="clock">07:00</h1>
-            <p>COMMANDER V6</p>
+        <div class="top-deck">
+            <div class="clock-area">
+                <h1 id="clock">07:00</h1>
+                <p>WARLORD V7</p>
+            </div>
+            <div class="rings">
+                <!-- Ring 1: Tid (17h) -->
+                <div class="ring-box">
+                    <svg class="ring-svg" viewBox="0 0 55 55">
+                        <circle class="ring-bg" cx="27.5" cy="27.5" r="22"></circle>
+                        <circle id="ring-day" class="ring-val" cx="27.5" cy="27.5" r="22" stroke="#444"></circle>
+                    </svg>
+                    <div class="ring-icon">🌅</div>
+                </div>
+                <!-- Ring 2: Budget (Prio 1-3) -->
+                <div class="ring-box">
+                    <svg class="ring-svg" viewBox="0 0 55 55">
+                        <circle class="ring-bg" cx="27.5" cy="27.5" r="22"></circle>
+                        <circle id="ring-budget" class="ring-val" cx="27.5" cy="27.5" r="22" stroke="url(#gradPrio)"></circle>
+                        <defs><linearGradient id="gradPrio" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff3b30" /><stop offset="100%" stop-color="#ffcc00" /></linearGradient></defs>
+                    </svg>
+                    <div class="ring-icon">🔥</div>
+                </div>
+            </div>
         </div>
-        <div class="rings-wrapper">
-            <!-- Ring 1: Dagen -->
-            <div class="ring-container">
-                <svg class="ring-svg" viewBox="0 0 60 60">
-                    <circle class="ring-bg" cx="30" cy="30" r="24"></circle>
-                    <circle id="ring-day" class="ring-fill" cx="30" cy="30" r="24" stroke="#666"></circle>
-                </svg>
-                <div class="ring-icon">🌅</div>
-                <div class="ring-label">17h</div>
-            </div>
-            <!-- Ring 2: Budget (Prio 1/2) -->
-            <div class="ring-container">
-                <svg class="ring-svg" viewBox="0 0 60 60">
-                    <circle class="ring-bg" cx="30" cy="30" r="24"></circle>
-                    <circle id="ring-budget" class="ring-fill" cx="30" cy="30" r="24" stroke="#ff3b30"></circle>
-                </svg>
-                <div class="ring-icon">🎯</div>
-                <div class="ring-label">Prio</div>
-            </div>
+
+        <!-- FILTER TABS -->
+        <div class="filter-bar">
+            <div class="filter-pill active" onclick="setFilter('today', this)">IDAG (1-3)</div>
+            <div class="filter-pill" onclick="setFilter('all', this)">ALLA</div>
+            <div class="filter-pill" onclick="setFilter('todo', this)">GÖRA</div>
         </div>
     </div>
 
-    <!-- VIEW: IDAG -->
+    <!-- MAIN VIEW: TODAY -->
     <div id="view-today" class="view-section active">
-        <div id="project-list"></div>
-        <div style="height: 50px;"></div> <!-- Spacing -->
+        <div id="task-list"></div>
     </div>
 
-    <!-- VIEW: VECKA -->
-    <div id="view-week" class="view-section">
-        <div class="total-summary">
-            <div class="big-label">Senaste 7 Dagar</div>
-            <div class="big-number" id="week-total">0h</div>
-        </div>
-        <div id="week-breakdown"></div>
+    <!-- STATS VIEWS -->
+    <div id="view-week" class="view-section" style="padding: 20px;">
+        <h2>Veckans Insats</h2>
+        <div id="week-stats"></div>
     </div>
 
-    <!-- VIEW: MÅNAD -->
-    <div id="view-month" class="view-section">
-        <div class="total-summary">
-            <div class="big-label">Senaste 30 Dagar</div>
-            <div class="big-number" id="month-total">0h</div>
-        </div>
-        <div id="month-breakdown"></div>
+    <div id="view-month" class="view-section" style="padding: 20px;">
+        <h2>Månadens Insats</h2>
+        <div id="month-stats"></div>
     </div>
 
-    <!-- NAVIGATION -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchView('today', this)">
-            <i class="fas fa-calendar-day"></i>
-            <span>IDAG</span>
-        </div>
-        <div class="nav-item" onclick="switchView('week', this)">
-            <i class="fas fa-chart-bar"></i>
-            <span>VECKA</span>
-        </div>
-        <div class="nav-item" onclick="switchView('month', this)">
-            <i class="fas fa-calendar-alt"></i>
-            <span>MÅNAD</span>
-        </div>
+    <!-- NAV BAR -->
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="switchTab('today', this)"><i class="fas fa-bolt"></i>FOKUS</button>
+        <button class="nav-btn" onclick="switchTab('week', this)"><i class="fas fa-chart-column"></i>VECKA</button>
+        <button class="nav-btn" onclick="switchTab('month', this)"><i class="fas fa-calendar"></i>MÅNAD</button>
     </div>
 
 <script>
-    // --- KONFIG ---
-    const WAKE_TIME = 7; 
-    const SLEEP_TIME = 24; 
+    // --- SETUP ---
+    const WAKE_TIME = 7;
+    const SLEEP_TIME = 24;
 
-    // --- PROJEKT LISTA (ALLT SYNLIGT) ---
     const projects = [
         { id: 'yt_long', title: 'YouTube Lång', prio: 1, target: 120 },
         { id: 'yt_short', title: 'YouTube Kort', prio: 1, target: 60 },
@@ -237,242 +255,231 @@
         { id: 'prep', title: 'Meal Prep', prio: 4, target: 60 },
         
         { id: 'coach', title: 'Coaching', prio: 5, target: 30 },
-        
         { id: 'strategy', title: 'Strategi', prio: 6, target: 30 },
         { id: 'ai', title: 'AI & Tech', prio: 6, target: 30 }
     ];
 
-    // --- DATA STORE ---
-    // history = { "YYYY-MM-DD": { "yt_long": 60, "social": 15 } }
-    let history = JSON.parse(localStorage.getItem('khalifa_history')) || {};
-    
-    // activeTask = { id: 'yt_long', start: 17023123123 } eller null
-    let activeTask = JSON.parse(localStorage.getItem('khalifa_active')) || null;
+    let history = JSON.parse(localStorage.getItem('khalifa_v7_hist')) || {};
+    let activeTask = JSON.parse(localStorage.getItem('khalifa_v7_active')) || null;
+    let filterMode = 'today'; // 'today', 'all', 'todo'
 
-    // --- DAGENS DATA ---
+    // --- CORE LOGIC ---
     function getTodayStr() { return new Date().toISOString().split('T')[0]; }
     function getTodayData() { 
         const d = getTodayStr();
         if(!history[d]) history[d] = {};
         return history[d];
     }
-    function save() {
-        localStorage.setItem('khalifa_history', JSON.stringify(history));
-        localStorage.setItem('khalifa_active', JSON.stringify(activeTask));
-    }
 
-    // --- RENDER TODAY ---
-    function renderToday() {
-        const todayData = getTodayData();
-        const list = document.getElementById('project-list');
+    function renderList() {
+        const list = document.getElementById('task-list');
         list.innerHTML = '';
+        const todayData = getTodayData();
 
-        const zones = {
-            1: { color: 'var(--p1)', title: 'PRIO 1: TUNG', html: '' },
-            2: { color: 'var(--p2)', title: 'PRIO 2: BALANS', html: '' },
-            3: { color: 'var(--p3)', title: 'PRIO 3: GRUND', html: '' },
-            4: { color: 'var(--p46)', title: 'PRIO 4-6: UTVECKLING', html: '' }
-        };
+        // Sortera projekten så Prio 1 alltid är överst
+        const sorted = [...projects].sort((a,b) => a.prio - b.prio);
+        
+        let lastPrio = 0;
 
-        projects.forEach(p => {
+        sorted.forEach(p => {
+            // FILTER LOGIK
+            if(filterMode === 'today' && p.prio > 3) return;
+            if(filterMode === 'todo' && (todayData[p.id] || 0) >= p.target) return;
+
+            // Header för zon
+            if(p.prio !== lastPrio) {
+                let label = "FRAMTID (Prio 4-6)";
+                if(p.prio === 1) label = "🔥 TUNG ZON (Prio 1)";
+                if(p.prio === 2) label = "⚖️ BALANS (Prio 2)";
+                if(p.prio === 3) label = "⚓️ GRUND (Prio 3)";
+                
+                list.innerHTML += `<div class="zone-label">${label} <div class="zone-line"></div></div>`;
+                lastPrio = p.prio;
+            }
+
             const mins = todayData[p.id] || 0;
-            const isTargetMet = mins >= p.target;
             const isActive = activeTask && activeTask.id === p.id;
-            
-            // Hantera "Gjord" checkmark
-            let checkIcon = isTargetMet ? '<i class="fas fa-check-circle" style="color:var(--gold)"></i>' : '';
-            
-            // Knapp Ikon
-            let btnIcon = isActive ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-play"></i>';
-            let cardClass = isActive ? 'task-card recording' : (isTargetMet ? 'task-card done' : 'task-card');
+            const isDone = mins >= p.target;
 
-            // Om aktiv, visa räknande tid
-            let displayTime = formatTime(mins);
-            if(isActive) displayTime = "REC..."; 
+            // CSS Klasser
+            let classes = 'task-card';
+            if(p.prio === 1) classes += ' prio-1';
+            if(p.prio > 3) classes += ' prio-low';
+            if(isActive) classes += ' recording';
+            else if(isDone) classes += ' done';
 
-            const html = `
-                <div class="${cardClass}">
-                    <div class="task-left">
-                        <span class="task-title">${p.title} ${checkIcon}</span>
+            // Ikon
+            let icon = isActive ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-play"></i>';
+            if(isDone && !isActive) icon = '<i class="fas fa-check"></i>';
+
+            // Timer Text (Live eller Statisk)
+            let timeTxt = formatTime(mins);
+            let badgeId = `badge-${p.id}`;
+
+            // Hero Border för Prio 1
+            let borderHtml = p.prio === 1 ? '<div class="prio-1-border"></div>' : '';
+
+            list.innerHTML += `
+                <div class="${classes}" id="card-${p.id}">
+                    ${borderHtml}
+                    <div class="task-info">
+                        <span class="task-title">${p.title}</span>
                         <span class="task-meta">Mål: ${p.target}m</span>
                     </div>
-                    <div class="task-right">
-                        <span class="time-badge">${displayTime}</span>
-                        <button class="btn-play" onclick="toggleTask('${p.id}')">${btnIcon}</button>
+                    <div class="task-action">
+                        <div class="timer-badge" id="${badgeId}">${timeTxt}</div>
+                        <button class="btn-play" onclick="toggleTask('${p.id}')">${icon}</button>
                     </div>
                 </div>
             `;
-
-            let z = p.prio > 3 ? 4 : p.prio;
-            zones[z].html += html;
         });
-
-        // Rita ut zoner
-        for(let z=1; z<=4; z++) {
-            list.innerHTML += `
-                <div class="zone-title">
-                    <div class="dot" style="background:${zones[z].color}"></div>
-                    ${zones[z].title}
-                </div>
-                ${zones[z].html}
-            `;
-        }
-
         updateRings();
     }
 
-    // --- TIMER LOGIK (START/STOPP) ---
+    // --- TIMER SYSTEM ---
     function toggleTask(id) {
-        vibrate(20);
+        if(navigator.vibrate) navigator.vibrate(20);
         const now = Date.now();
 
-        if (activeTask && activeTask.id === id) {
-            // STOPPA
-            const duration = Math.floor((now - activeTask.start) / 60000); // minuter
-            if (duration > 0) {
-                const d = getTodayStr();
-                if (!history[d]) history[d] = {};
-                if (!history[d][id]) history[d][id] = 0;
-                history[d][id] += duration;
-            }
+        if(activeTask && activeTask.id === id) {
+            // STOP
+            const diff = Math.floor((now - activeTask.start)/60000);
+            addToHistory(id, diff);
+            
+            // Kolla om målet nåddes JUST NU
+            const p = projects.find(x=>x.id===id);
+            const total = getTodayData()[id];
+            // Trigga konfetti om vi gick över målet nyss (eller är över)
+            if(total >= p.target && (total - diff) < p.target) triggerConfetti();
+            else if (total >= p.target) triggerConfetti(); // Generös belöning
+
             activeTask = null;
         } else {
-            // OM ANNAN AKTIV -> STOPPA DEN FÖRST
-            if (activeTask) {
-                const prevId = activeTask.id;
-                const duration = Math.floor((now - activeTask.start) / 60000);
-                if (duration > 0) {
-                    const d = getTodayStr();
-                    if (!history[d]) history[d] = {};
-                    if (!history[d][prevId]) history[d][prevId] = 0;
-                    history[d][prevId] += duration;
-                }
+            // SWITCH
+            if(activeTask) {
+                const diff = Math.floor((now - activeTask.start)/60000);
+                addToHistory(activeTask.id, diff);
             }
-            // STARTA NY
+            // START
             activeTask = { id: id, start: now };
         }
-        save();
-        renderToday();
+
+        saveState();
+        renderList();
     }
 
-    // --- RENDER STATS (VECKA/MÅNAD) ---
-    function renderStats(days, containerId, totalId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        
-        let totalMins = 0;
-        let categoryMins = { 1:0, 2:0, 3:0, 4:0 }; // Prio buckets
-        
-        // Loopa bakåt X dagar
-        for(let i=0; i<days; i++) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr = d.toISOString().split('T')[0];
-            const dayData = history[dateStr] || {};
+    function addToHistory(id, mins) {
+        if(mins <= 0) return;
+        const d = getTodayStr();
+        if(!history[d]) history[d] = {};
+        if(!history[d][id]) history[d][id] = 0;
+        history[d][id] += mins;
+    }
+
+    // LIVE TIMER UPDATE (Varje sekund)
+    setInterval(() => {
+        if(activeTask) {
+            const now = Date.now();
+            const diffSec = Math.floor((now - activeTask.start)/1000);
             
-            projects.forEach(p => {
-                if(dayData[p.id]) {
-                    const m = dayData[p.id];
-                    totalMins += m;
-                    let z = p.prio > 3 ? 4 : p.prio;
-                    categoryMins[z] += m;
-                }
-            });
+            const badge = document.getElementById(`badge-${activeTask.id}`);
+            if(badge) {
+                // Formatera MM:SS
+                const m = Math.floor(diffSec / 60);
+                const s = diffSec % 60;
+                badge.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
         }
+    }, 1000);
 
-        document.getElementById(totalId).innerText = (totalMins/60).toFixed(1) + "h";
-
-        // Rita bars för kategorier
-        const cats = [
-            { id:1, label:'Prio 1 (Tung)', color:'var(--p1)' },
-            { id:2, label:'Prio 2 (Balans)', color:'var(--p2)' },
-            { id:3, label:'Prio 3 (Grund)', color:'var(--p3)' },
-            { id:4, label:'Prio 4-6 (Framtid)', color:'var(--p46)' }
-        ];
-
-        cats.forEach(c => {
-            const val = categoryMins[c.id];
-            const pct = totalMins > 0 ? (val / totalMins) * 100 : 0;
-            const html = `
-                <div class="stat-card">
-                    <div class="stat-row">
-                        <span style="color:${c.color}; font-weight:bold;">${c.label}</span>
-                        <span>${formatTime(val)}</span>
-                    </div>
-                    <div class="stat-bar-bg">
-                        <div class="stat-bar-fill" style="width:${pct}%; background:${c.color}"></div>
-                    </div>
-                </div>
-            `;
-            container.innerHTML += html;
-        });
+    // --- GUI HELPERS ---
+    function setFilter(mode, btn) {
+        filterMode = mode;
+        document.querySelectorAll('.filter-pill').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+        renderList();
     }
 
-    // --- RINGS ---
+    function switchTab(view, btn) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${view}`).classList.add('active');
+        
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+
+        if(view !== 'today') renderStats(view === 'week' ? 7 : 30, `view-${view}`);
+    }
+
     function updateRings() {
         // Ring 1: Tid (17h)
-        const now = new Date();
-        const h = now.getHours() + now.getMinutes()/60;
+        const h = new Date().getHours() + new Date().getMinutes()/60;
         const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
-        setRing('ring-day', dayPct, '#666');
+        setRing('ring-day', dayPct);
 
-        // Ring 2: Budget (Bara Prio 1 & 2 räknas!)
+        // Ring 2: Budget (Prio 1-3)
         const todayData = getTodayData();
-        let totalGoal = 0;
-        let totalDone = 0;
-        
-        projects.filter(p => p.prio <= 2).forEach(p => {
-            totalGoal += p.target;
-            totalDone += Math.min(p.target, (todayData[p.id] || 0)); // Cap at target for percentage
+        let goal = 0, done = 0;
+        projects.filter(p => p.prio <= 3).forEach(p => {
+            goal += p.target;
+            done += Math.min(p.target, (todayData[p.id] || 0));
         });
-        
-        const budgetPct = totalGoal > 0 ? totalDone / totalGoal : 0;
-        const color = budgetPct >= 1 ? 'var(--gold)' : 'var(--p1)';
-        setRing('ring-budget', budgetPct, color);
+        setRing('ring-budget', goal > 0 ? done/goal : 0);
     }
 
-    function setRing(id, pct, color) {
+    function setRing(id, pct) {
         const circle = document.getElementById(id);
         const r = circle.r.baseVal.value;
         const c = r * 2 * Math.PI;
-        const offset = c - (pct * c);
-        circle.style.strokeDashoffset = offset;
-        circle.style.stroke = color;
+        circle.style.strokeDashoffset = c - (pct * c);
     }
 
-    // --- UTILS ---
-    function switchView(viewName, btn) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-' + viewName).classList.add('active');
-        
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
+    function renderStats(days, containerId) {
+        // Enkel text-baserad statistik för nu
+        let html = `<div style="text-align:center; padding:20px; color:#666;">Statistik kommer när du har samlat data!</div>`;
+        // Här kan vi bygga grafer senare
+        document.getElementById(containerId).innerHTML = html;
+    }
 
-        if(viewName === 'week') renderStats(7, 'week-breakdown', 'week-total');
-        if(viewName === 'month') renderStats(30, 'month-breakdown', 'month-total');
+    function saveState() {
+        localStorage.setItem('khalifa_v7_hist', JSON.stringify(history));
+        localStorage.setItem('khalifa_v7_active', JSON.stringify(activeTask));
     }
 
     function formatTime(m) {
-        if(m >= 60) return (m/60).toFixed(1) + 'h';
-        return m + 'm';
+        return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm';
     }
-    
-    function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
     function updateClock() {
-        const d = new Date();
-        document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        // Auto-update timer display visual only (logiken sker vid stopp)
-        if(activeTask) {
-            renderToday(); // Refresh UI to show "REC..." pulse
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
+
+    // --- KONFETTI ---
+    function triggerConfetti() {
+        const c = document.getElementById('confetti');
+        const ctx = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight;
+        let p = [];
+        for(let i=0; i<150; i++) p.push({
+            x: c.width/2, y: c.height/2,
+            vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20,
+            color: `hsl(${Math.random()*360}, 100%, 50%)`, life: 100
+        });
+        function anim() {
+            ctx.clearRect(0,0,c.width,c.height);
+            p.forEach((k,i) => {
+                k.x+=k.vx; k.y+=k.vy; k.life--; k.vy+=0.5;
+                ctx.fillStyle=k.color; ctx.fillRect(k.x,k.y,5,5);
+                if(k.life<=0) p.splice(i,1);
+            });
+            if(p.length) requestAnimationFrame(anim);
         }
+        anim();
     }
 
     // INIT
-    setInterval(updateClock, 30000); // 30 sek uppdatering
+    setInterval(updateClock, 10000);
     updateClock();
-    renderToday();
+    renderList();
 
 </script>
 </body>
