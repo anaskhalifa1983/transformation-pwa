@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050505">
-    <title>Khalifa Architect V8</title>
+    <title>Khalifa Commander V9</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -15,11 +15,11 @@
             --text: #fff;
             --muted: #888;
             
-            /* GRADIENTS */
-            --p1-grad: linear-gradient(135deg, #d32f2f, #ef5350);
-            --p2-grad: linear-gradient(135deg, #f57c00, #ffb74d);
-            --p3-grad: linear-gradient(135deg, #1976d2, #42a5f5);
-            --p46-grad: linear-gradient(135deg, #7b1fa2, #ba68c8);
+            /* EXTREME GRADIENTS */
+            --p1-grad: linear-gradient(135deg, #ff2c2c, #ff6b30);
+            --p2-grad: linear-gradient(135deg, #ff8800, #ffbb00);
+            --p3-grad: linear-gradient(135deg, #007aff, #00d4ff);
+            --p46-grad: linear-gradient(135deg, #7b1fa2, #e040fb);
             
             --gold: #ffd700;
             --nav-height: 80px;
@@ -33,55 +33,68 @@
             color: var(--text);
             margin: 0; padding: 0;
             padding-top: 140px; 
-            padding-bottom: 120px;
+            padding-bottom: 100px;
             overscroll-behavior-y: none;
         }
 
         /* --- HEADER --- */
         .fixed-header {
             position: fixed; top: 0; left: 0; right: 0;
-            background: rgba(5,5,5,0.98); z-index: 100;
-            border-bottom: 1px solid #222;
+            background: rgba(5,5,5,0.96); backdrop-filter: blur(10px);
+            z-index: 100; border-bottom: 1px solid #222;
         }
         
         .top-deck {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; height: 90px;
+            padding: 10px 20px; height: 90px;
         }
 
-        .clock h1 { margin: 0; font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
-        .clock p { margin: 0; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 2px; }
+        .clock-area h1 { margin: 0; font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
+        .clock-area p { margin: 0; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
-        /* FILTER TABS */
+        .header-right { display: flex; align-items: center; gap: 15px; }
+
+        /* RINGS */
+        .rings-wrapper { display: flex; gap: 10px; }
+        .ring-box { position: relative; width: 50px; height: 50px; }
+        .ring-svg { transform: rotate(-90deg); width: 50px; height: 50px; }
+        .ring-bg { fill: none; stroke: #222; stroke-width: 4; }
+        .ring-val { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 126; stroke-dashoffset: 126; transition: stroke-dashoffset 1s, stroke 0.5s; }
+        .ring-icon { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:0.9rem; }
+
+        /* HAMBURGER */
+        .menu-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; padding: 5px; }
+
+        /* FILTER BAR */
         .filter-bar {
             display: flex; gap: 10px; padding: 0 20px 15px 20px;
             overflow-x: auto;
         }
         .filter-pill {
-            background: #222; border: 1px solid #333; color: #888;
-            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            background: #1a1a1a; border: 1px solid #333; color: #888;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
             white-space: nowrap; transition: all 0.2s;
         }
         .filter-pill.active { background: #fff; color: #000; }
 
         /* --- DASHBOARD SUMMARY CARD --- */
         .summary-card {
-            background: linear-gradient(180deg, #1a1a1a, #111);
-            margin: 20px; padding: 15px; border-radius: 16px; border: 1px solid #2a2a2a;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            background: linear-gradient(180deg, #181818, #0a0a0a);
+            margin: 20px 20px 30px 20px; padding: 15px; border-radius: 16px; border: 1px solid #2a2a2a;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center;
         }
-        .sum-item { text-align: center; }
-        .sum-val { font-size: 1.5rem; font-weight: 800; display: block; }
-        .sum-label { font-size: 0.7rem; color: #666; text-transform: uppercase; }
-        .progress-total { grid-column: span 2; background: #222; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px; }
-        .progress-fill-total { height: 100%; background: var(--gold); width: 0%; transition: width 0.5s; }
+        .sum-val { font-size: 1.2rem; font-weight: 800; display: block; color: #fff; }
+        .sum-label { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: 700; }
+        .sum-sep { width: 1px; background: #222; height: 30px; margin: auto; }
 
         /* --- TASK CARDS --- */
-        .zone-label {
-            margin: 30px 20px 10px 20px; font-size: 0.75rem; font-weight: 800; 
-            color: #555; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
+        .zone-header {
+            margin: 30px 20px 10px 20px; 
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-bottom: 5px; border-bottom: 1px solid #222;
         }
-        .zone-line { flex-grow: 1; height: 1px; background: #222; }
+        .zone-title { font-size: 0.8rem; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+        .zone-stats { font-size: 0.75rem; font-family: monospace; color: #666; }
 
         .task-card {
             background: var(--card-bg); margin: 0 20px 15px 20px; padding: 18px;
@@ -90,36 +103,33 @@
         }
         .task-card:active { transform: scale(0.98); }
 
-        /* PRIO 1 HERO */
-        .prio-1 {
-            background: linear-gradient(145deg, #1e0a0a 0%, #0a0a0a 100%);
-            border: 1px solid #4a1a1a;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .prio-1-mark { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--p1-grad); }
+        /* GRADIENT BORDERS & MARKERS */
+        .prio-1 { border-left: 4px solid #ff2c2c; }
+        .prio-2 { border-left: 4px solid #ff8800; }
+        .prio-3 { border-left: 4px solid #007aff; }
+        .prio-low { border-left: 4px solid #7b1fa2; opacity: 0.9; }
 
         /* STATES */
-        .recording { border-color: #ef5350; background: #2a0e0e; }
-        .paused { border-color: #ffb74d; background: #2a1e0e; animation: pulseYellow 2s infinite; }
-        .done { border-color: rgba(255, 215, 0, 0.2); }
+        .recording { background: #1a0a0a; border-color: #ff3b30; box-shadow: 0 0 20px rgba(255,59,48,0.1); }
+        .paused { background: #1a1505; border-color: #ffb74d; animation: pulseYellow 3s infinite; }
         .done .task-title { color: var(--gold); }
-
-        @keyframes pulseYellow { 0% { border-color: #ffb74d; } 50% { border-color: #664a1f; } 100% { border-color: #ffb74d; } }
+        
+        @keyframes pulseYellow { 0% { border-color: #ffb74d; } 50% { border-color: #554010; } 100% { border-color: #ffb74d; } }
 
         /* CARD CONTENT */
         .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .task-title { font-size: 1rem; font-weight: 700; display: block; }
-        .task-meta { font-size: 0.75rem; color: #666; margin-top: 2px; display: flex; gap: 8px; }
+        .task-title { font-size: 1rem; font-weight: 700; display: block; margin-bottom: 3px; }
+        .task-meta { font-size: 0.75rem; color: #666; display: flex; gap: 8px; }
         
         /* CONTROLS */
         .control-group { display: flex; align-items: center; gap: 10px; }
         
         .timer-badge { 
-            font-family: monospace; font-size: 0.9rem; color: #666; background: #000; 
+            font-family: monospace; font-size: 0.85rem; color: #555; background: #000; 
             padding: 6px 10px; border-radius: 6px; min-width: 65px; text-align: center; 
         }
         .recording .timer-badge { color: #fff; background: #d32f2f; }
-        .paused .timer-badge { color: #000; background: #ffb74d; }
+        .paused .timer-badge { color: #000; background: #ffb74d; width: auto; }
 
         .btn-main {
             width: 50px; height: 50px; border-radius: 50%; border: none;
@@ -129,33 +139,60 @@
         }
         .btn-stop {
             width: 35px; height: 35px; border-radius: 50%; border: none;
-            background: #222; color: #ef5350; font-size: 0.9rem;
+            background: #222; color: #ff2c2c; font-size: 0.9rem;
             display: none; align-items: center; justify-content: center;
         }
 
-        /* Active State Controls */
-        .recording .btn-main { background: var(--p1-grad); }
-        .recording .btn-stop { display: flex; }
-        .paused .btn-main { background: #ffb74d; color: #000; animation: none; }
-        .paused .btn-stop { display: flex; }
+        /* DYNAMIC COLORS FOR BUTTONS & BARS */
+        .prio-1 .recording .btn-main { background: var(--p1-grad); }
+        .prio-2 .recording .btn-main { background: var(--p2-grad); }
+        .prio-3 .recording .btn-main { background: var(--p3-grad); }
+        .prio-low .recording .btn-main { background: var(--p46-grad); }
+        
+        .paused .btn-main { background: #ffb74d !important; color: #000; }
 
-        /* Progress Bar inside Card */
+        .recording .btn-stop, .paused .btn-stop { display: flex; }
+
+        /* Progress Bar */
         .card-progress-bg { height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 10px; }
-        .card-progress-fill { height: 100%; background: #444; width: 0%; transition: width 0.3s; }
+        .card-progress-fill { height: 100%; background: #444; width: 0%; transition: width 0.5s; }
+        
         .prio-1 .card-progress-fill { background: var(--p1-grad); }
-        .done .card-progress-fill { background: var(--gold); }
+        .prio-2 .card-progress-fill { background: var(--p2-grad); }
+        .prio-3 .card-progress-fill { background: var(--p3-grad); }
+        .prio-low .card-progress-fill { background: var(--p46-grad); }
+        .done .card-progress-fill { background: var(--gold) !important; }
 
         /* --- STATS VIEW --- */
-        .view-section { display: none; padding: 20px; }
+        .view-section { display: none; padding: 0 20px 20px 20px; }
         .view-section.active { display: block; animation: fadeIn 0.3s; }
         
-        .stat-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.8rem; }
-        .stat-label { width: 40px; color: #888; }
-        .stat-bar-bg { flex-grow: 1; height: 20px; background: #222; border-radius: 4px; margin: 0 10px; position: relative; }
-        .stat-bar-fill { height: 100%; background: #444; border-radius: 4px; min-width: 2px; }
-        .stat-val { width: 50px; text-align: right; font-weight: bold; }
+        .chart-container { display: flex; justify-content: space-between; align-items: flex-end; height: 150px; margin: 20px 0; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .chart-col { display: flex; flex-direction: column; align-items: center; width: 12%; }
+        .chart-bar { width: 100%; background: #333; border-radius: 4px 4px 0 0; transition: height 0.5s; min-height: 2px; }
+        .chart-day { font-size: 0.6rem; color: #666; margin-top: 5px; }
 
-        /* --- TOAST (UNDO) --- */
+        .dist-bar { display: flex; align-items: center; margin-bottom: 15px; }
+        .dist-label { width: 80px; font-size: 0.75rem; color: #aaa; font-weight: bold; }
+        .dist-track { flex-grow: 1; height: 24px; background: #222; border-radius: 4px; margin: 0 10px; position: relative; overflow: hidden; }
+        .dist-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 0.7rem; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,0.5); font-weight: bold; width: 0%; transition: width 0.5s;}
+        
+        /* --- BOTTOM NAV --- */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+            background: #000; border-top: 1px solid #1a1a1a;
+            display: grid; grid-template-columns: 1fr 1fr;
+            z-index: 150;
+        }
+        .nav-btn {
+            background: none; border: none; color: #555;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.75rem; gap: 6px; font-weight: 700;
+        }
+        .nav-btn.active { color: #fff; }
+        .nav-btn i { font-size: 1.4rem; }
+
+        /* --- OVERLAYS --- */
         .toast {
             position: fixed; bottom: 90px; left: 20px; right: 20px;
             background: #222; border: 1px solid #333; color: #fff;
@@ -167,62 +204,76 @@
         .toast.show { transform: translateY(0); }
         .btn-undo { background: none; border: 1px solid #555; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
 
-        /* --- BOTTOM NAV --- */
-        .nav-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
-            background: #000; border-top: 1px solid #1a1a1a;
-            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; /* +1 för Settings */
-            z-index: 150;
-        }
-        .nav-btn {
-            background: none; border: none; color: #555;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.65rem; gap: 4px;
-        }
-        .nav-btn.active { color: #fff; }
-        .nav-btn i { font-size: 1.2rem; }
-
-        /* MODAL (Export) */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:300; align-items:center; justify-content:center; }
-        .modal-content { background:#222; padding:20px; border-radius:15px; width:85%; text-align:center; }
-        .btn-full { width:100%; padding:15px; background:#333; border:none; color:#fff; border-radius:8px; margin-bottom:10px; font-weight:bold; }
+        .modal-content { background:#222; padding:25px; border-radius:15px; width:85%; text-align:center; border: 1px solid #444; }
+        .modal-btn { width:100%; padding:15px; background:#333; border:none; color:#fff; border-radius:8px; margin-bottom:10px; font-weight:bold; font-size: 1rem; }
+        
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
 
+        @keyframes pulseYellow { 0% { border-color: #ffb74d; } 50% { border-color: #664a1f; } 100% { border-color: #ffb74d; } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
     </style>
 </head>
 <body>
 
+    <canvas id="confetti"></canvas>
+
     <!-- HEADER -->
     <div class="fixed-header">
         <div class="top-deck">
-            <div class="clock">
+            <div class="clock-area">
                 <h1 id="clock">07:00</h1>
-                <p>THE ARCHITECT V8</p>
+                <p>COMMANDER V9</p>
             </div>
-            <!-- Ringar borttagna för renare look, ersatta av Summary Card -->
+            
+            <div class="header-right">
+                <div class="rings-wrapper">
+                    <!-- Ring 1: Tid (17h) -->
+                    <div class="ring-box">
+                        <svg class="ring-svg" viewBox="0 0 50 50">
+                            <circle class="ring-bg" cx="25" cy="25" r="20"></circle>
+                            <circle id="ring-day" class="ring-val" cx="25" cy="25" r="20" stroke="#666"></circle>
+                        </svg>
+                        <div class="ring-icon">🕒</div>
+                    </div>
+                    <!-- Ring 2: Budget (Prio 1-3) -->
+                    <div class="ring-box">
+                        <svg class="ring-svg" viewBox="0 0 50 50">
+                            <circle class="ring-bg" cx="25" cy="25" r="20"></circle>
+                            <circle id="ring-budget" class="ring-val" cx="25" cy="25" r="20" stroke="#ff8800"></circle>
+                        </svg>
+                        <div class="ring-icon">🔥</div>
+                    </div>
+                </div>
+                <button class="menu-btn" onclick="openSettings()"><i class="fas fa-bars"></i></button>
+            </div>
         </div>
+
         <div class="filter-bar">
             <div class="filter-pill active" onclick="setFilter('today', this)">IDAG</div>
-            <div class="filter-pill" onclick="setFilter('all', this)">ALLA PROJEKT</div>
+            <div class="filter-pill" onclick="setFilter('all', this)">ALLA</div>
             <div class="filter-pill" onclick="setFilter('todo', this)">GÖRA</div>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
     <div id="view-today" class="view-section active">
-        <!-- Summary Card -->
+        <!-- FIXED SUMMARY CARD (Fix 4) -->
         <div class="summary-card">
-            <div class="sum-item">
+            <div>
                 <span class="sum-val" id="sum-time">0h 0m</span>
-                <span class="sum-label">Jobbat Idag</span>
+                <span class="sum-label">Total Tid</span>
             </div>
-            <div class="sum-item">
-                <span class="sum-val" id="sum-prio1">0%</span>
-                <span class="sum-label">Prio 1 Mål</span>
+            <div class="sum-sep"></div>
+            <div>
+                <span class="sum-val" id="sum-tasks">0/0</span>
+                <span class="sum-label">Klara Mål</span>
             </div>
-            <div class="progress-total">
-                <div class="progress-fill-total" id="daily-bar"></div>
+            <div class="sum-sep"></div>
+            <div>
+                <span class="sum-val" id="sum-eff">0%</span>
+                <span class="sum-label">Prio 1-3</span>
             </div>
         </div>
 
@@ -231,20 +282,22 @@
 
     <!-- STATS VIEW -->
     <div id="view-stats" class="view-section">
-        <h2>Veckans Analys</h2>
-        <div id="week-chart" style="margin-top:20px;"></div>
+        <h2>Veckans Översikt</h2>
+        <div id="week-chart" class="chart-container"></div>
         
-        <h2 style="margin-top:40px;">Fördelning</h2>
-        <div id="dist-chart"></div>
+        <h2>Prio Fördelning</h2>
+        <div id="prio-breakdown"></div>
     </div>
 
-    <!-- SETTINGS VIEW -->
-    <div id="view-settings" class="view-section">
-        <h2>Data & Säkerhet</h2>
-        <button class="btn-full" onclick="exportData()"><i class="fas fa-download"></i> Exportera Backup</button>
-        <button class="btn-full" onclick="document.getElementById('file-input').click()"><i class="fas fa-upload"></i> Importera Backup</button>
-        <input type="file" id="file-input" style="display:none" onchange="importData(this)">
-        <p style="color:#666; font-size:0.8rem; text-align:center; margin-top:20px;">V8.0 - LocalStorage System</p>
+    <!-- SETTINGS MODAL (Fix 5) -->
+    <div id="modal-settings" class="modal" onclick="if(event.target===this) this.style.display='none'">
+        <div class="modal-content">
+            <h3>Inställningar</h3>
+            <button class="modal-btn" onclick="exportData()"><i class="fas fa-download"></i> Exportera Data</button>
+            <button class="modal-btn" onclick="document.getElementById('file-input').click()"><i class="fas fa-upload"></i> Importera Data</button>
+            <input type="file" id="file-input" style="display:none" onchange="importData(this)">
+            <button class="modal-btn" style="background:#444; margin-top:10px;" onclick="document.getElementById('modal-settings').style.display='none'">Stäng</button>
+        </div>
     </div>
 
     <!-- UNDO TOAST -->
@@ -255,9 +308,8 @@
 
     <!-- BOTTOM NAV -->
     <div class="nav-bar">
-        <button class="nav-btn active" onclick="switchView('today', this)"><i class="fas fa-layer-group"></i>FOKUS</button>
-        <button class="nav-btn" onclick="switchView('stats', this)"><i class="fas fa-chart-pie"></i>ANALYS</button>
-        <button class="nav-btn" onclick="switchView('settings', this)"><i class="fas fa-cog"></i>INST.</button>
+        <button class="nav-btn active" onclick="switchView('today', this)"><i class="fas fa-bolt"></i>FOKUS</button>
+        <button class="nav-btn" onclick="switchView('stats', this)"><i class="fas fa-chart-bar"></i>STATISTIK</button>
     </div>
 
 <script>
@@ -281,14 +333,17 @@
         { id: 'ai', title: 'AI & Tech', icon: '🤖', prio: 6, target: 30 }
     ];
 
-    // --- STATE MANAGER ---
-    let history = JSON.parse(localStorage.getItem('khalifa_v8_hist')) || {};
-    // ActiveTask Struktur: { id: 'yt_long', start: timestamp, accumulated: ms, state: 'running'|'paused' }
-    let activeTask = JSON.parse(localStorage.getItem('khalifa_v8_active')) || null;
-    let lastLog = null; // För Undo
-    let filterMode = 'today';
+    const WAKE_TIME = 7; 
+    const SLEEP_TIME = 24;
 
-    // --- HELPER FUNCTIONS ---
+    // --- STATE ---
+    let history = JSON.parse(localStorage.getItem('khalifa_v9_hist')) || {};
+    let activeTask = JSON.parse(localStorage.getItem('khalifa_v9_active')) || null;
+    let lastLog = null;
+    let filterMode = 'today';
+    let cachedStreaks = {}; // Optimization (Fix 8)
+
+    // --- CORE ---
     function getTodayStr() { return new Date().toISOString().split('T')[0]; }
     function getTodayData() { 
         const d = getTodayStr();
@@ -296,105 +351,121 @@
         return history[d];
     }
     function saveState() {
-        localStorage.setItem('khalifa_v8_hist', JSON.stringify(history));
-        localStorage.setItem('khalifa_v8_active', JSON.stringify(activeTask));
+        localStorage.setItem('khalifa_v9_hist', JSON.stringify(history));
+        localStorage.setItem('khalifa_v9_active', JSON.stringify(activeTask));
     }
     function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
-    // --- CORE RENDERER ---
-    function render() {
-        renderDashboard();
-        renderSummary();
+    // --- STREAK OPTIMIZATION (Fix 8) ---
+    function updateStreaks() {
+        cachedStreaks = {};
+        projects.forEach(p => {
+            let s = 0;
+            for(let i=1; i<30; i++) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                if(history[ds] && history[ds][p.id] > 10) s++;
+                else break;
+            }
+            cachedStreaks[p.id] = s;
+        });
     }
 
-    function renderDashboard() {
+    // --- RENDER ENGINE ---
+    function render() {
+        if(Object.keys(cachedStreaks).length === 0) updateStreaks();
+        renderList();
+        renderSummary();
+        updateRings();
+    }
+
+    function renderList() {
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         const todayData = getTodayData();
-        
-        // Sortera: Prio 1 först
+
+        // 1. Gruppera data för zon-headers (Fix 10)
+        let zoneStats = { 1:{done:0, target:0}, 2:{done:0, target:0}, 3:{done:0, target:0}, 4:{done:0, target:0} };
+        projects.forEach(p => {
+            const z = p.prio > 3 ? 4 : p.prio;
+            zoneStats[z].target += p.target;
+            zoneStats[z].done += (todayData[p.id] || 0);
+        });
+
         const sorted = [...projects].sort((a,b) => a.prio - b.prio);
         let lastPrio = 0;
 
         sorted.forEach(p => {
-            // FILTER
             if(filterMode === 'today' && p.prio > 3) return;
             if(filterMode === 'todo' && (todayData[p.id] || 0) >= p.target) return;
 
-            // ZONE HEADERS
+            // RENDER ZONE HEADER (Fix 10)
             if(p.prio !== lastPrio) {
-                let label = "";
-                if(p.prio === 1) label = "🔥 TUNG ZON";
-                else if(p.prio === 2) label = "⚖️ BALANS";
-                else if(p.prio === 3) label = "⚓️ GRUND";
-                else label = "🚀 FRAMTID (Prio 4-6)";
-                list.innerHTML += `<div class="zone-label">${label} <div class="zone-line"></div></div>`;
+                // Om vi hoppar från 1 till 2, skriv ut header för 2
+                // Men om filter döljer alla 4-6, skriv inte ut 4
+                
+                let z = p.prio > 3 ? 4 : p.prio;
+                let label = "FRAMTID";
+                let icon = "🚀";
+                if(z===1) { label="TUNG ZON"; icon="🔥"; }
+                if(z===2) { label="BALANS"; icon="⚖️"; }
+                if(z===3) { label="GRUND"; icon="⚓️"; }
+
+                // Formatera tid för header
+                const doneH = formatTimeShort(zoneStats[z].done);
+                const targH = formatTimeShort(zoneStats[z].target);
+
+                list.innerHTML += `
+                    <div class="zone-header">
+                        <span class="zone-title">${icon} ${label}</span>
+                        <span class="zone-stats">${doneH} / ${targH}</span>
+                    </div>`;
                 lastPrio = p.prio;
             }
 
-            // STATE CALCULATION
             const totalMins = todayData[p.id] || 0;
             const isDone = totalMins >= p.target;
             const isActive = activeTask && activeTask.id === p.id;
             const isPaused = isActive && activeTask.state === 'paused';
-
-            // STREAK CALC (Enkel)
-            const streak = calculateStreak(p.id);
-            const streakHtml = streak > 1 ? `<span style="color:#ff9800; font-size:0.7rem;">🔥 ${streak} dagar</span>` : '';
-
-            // PROGRESS BAR
+            const streak = cachedStreaks[p.id] || 0;
             const progressPct = Math.min(100, (totalMins / p.target) * 100);
-            
-            // CLASSES
+
             let classes = 'task-card';
             if(p.prio === 1) classes += ' prio-1';
+            else if(p.prio === 2) classes += ' prio-2';
+            else if(p.prio === 3) classes += ' prio-3';
+            else classes += ' prio-low';
+
             if(isActive) classes += ' recording';
             if(isPaused) classes += ' paused';
             if(isDone && !isActive) classes += ' done';
 
-            // ICON & BUTTON
-            let btnIcon = '<i class="fas fa-play"></i>';
-            if(isActive && !isPaused) btnIcon = '<i class="fas fa-pause"></i>'; // Pause icon when running
-            if(isPaused) btnIcon = '<i class="fas fa-play"></i>'; // Play icon when paused
+            let btnIcon = isActive && !isPaused ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            let timeTxt = formatTime(totalMins);
+            if(isActive && !isPaused) timeTxt = "REC...";
+            
+            // PAUS TEXT (Fix 9)
+            if(isPaused) {
+                const m = Math.floor(activeTask.accumulated / 60000);
+                const s = Math.floor((activeTask.accumulated % 60000) / 1000);
+                timeTxt = `PAUS ${m}:${String(s).padStart(2,'0')}`;
+            }
 
-            // TIMER DISPLAY
-            let timeDisplay = formatTime(totalMins);
-            if(isActive) timeDisplay = "00:00"; // Placeholder, uppdateras av live-loop
+            const streakHtml = streak > 0 ? `<span style="color:#ff9800; font-size:0.7rem; margin-left:5px;">🔥 ${streak}</span>` : '';
 
-            // RENDER HTML
             const html = `
-                <div class="${classes}" id="card-${p.id}" 
-                     oncontextmenu="return false;" 
-                     ontouchstart="handleTouchStart('${p.id}')" 
-                     ontouchend="handleTouchEnd()" 
-                     onmousedown="handleTouchStart('${p.id}')" 
-                     onmouseup="handleTouchEnd()">
-                     
-                    ${p.prio === 1 ? '<div class="prio-1-mark"></div>' : ''}
-                    
+                <div class="${classes}" id="card-${p.id}" oncontextmenu="return false;" onmousedown="startLongPress('${p.id}')" onmouseup="cancelLongPress()" ontouchstart="startLongPress('${p.id}')" ontouchend="cancelLongPress()">
                     <div class="card-top">
-                        <div style="flex-grow:1;">
+                        <div style="flex-grow:1">
                             <span class="task-title">${p.icon} ${p.title}</span>
-                            <div class="task-meta">
-                                <span>Mål: ${p.target}m</span>
-                                ${streakHtml}
-                            </div>
+                            <div class="task-meta">Mål: ${p.target}m ${streakHtml}</div>
                         </div>
                         <div class="control-group">
-                            <div class="timer-badge" id="badge-${p.id}">${timeDisplay}</div>
-                            
-                            <!-- STOP BUTTON (Endast synlig när aktiv) -->
-                            <button class="btn-stop" onclick="stopTask('${p.id}', event)">
-                                <i class="fas fa-stop"></i>
-                            </button>
-
-                            <!-- MAIN PLAY/PAUSE -->
-                            <button class="btn-main" onclick="toggleTask('${p.id}')">
-                                ${btnIcon}
-                            </button>
+                            <div class="timer-badge" id="badge-${p.id}">${timeTxt}</div>
+                            <button class="btn-stop" onclick="stopTask('${p.id}')"><i class="fas fa-stop"></i></button>
+                            <button class="btn-main" onclick="toggleTask('${p.id}')">${btnIcon}</button>
                         </div>
                     </div>
-                    
                     <div class="card-progress-bg">
                         <div class="card-progress-fill" style="width:${progressPct}%"></div>
                     </div>
@@ -404,68 +475,79 @@
         });
     }
 
-    // --- SUMMARY RENDER ---
+    // --- SUMMARY CARD (Fix 4) ---
     function renderSummary() {
-        const todayData = getTodayData();
-        let totalMins = 0;
-        let prio1Goal = 0; 
-        let prio1Done = 0;
-
+        const d = getTodayData();
+        let total = 0, doneCount = 0, p13Goal = 0, p13Done = 0;
+        
         projects.forEach(p => {
-            const m = todayData[p.id] || 0;
-            totalMins += m;
-            if(p.prio === 1) {
-                prio1Goal += p.target;
-                prio1Done += Math.min(p.target, m);
+            const m = d[p.id] || 0;
+            total += m;
+            if(m >= p.target) doneCount++;
+            if(p.prio <= 3) {
+                p13Goal += p.target;
+                p13Done += Math.min(p.target, m);
             }
         });
 
-        document.getElementById('sum-time').innerText = formatTime(totalMins);
-        
-        const p1Pct = prio1Goal > 0 ? Math.round((prio1Done / prio1Goal) * 100) : 0;
-        document.getElementById('sum-prio1').innerText = p1Pct + "%";
-        
-        // Dagligt mål 14h (840m) för baren
-        const dayPct = Math.min(100, (totalMins / 840) * 100);
-        document.getElementById('daily-bar').style.width = dayPct + "%";
+        document.getElementById('sum-time').innerText = formatTime(total);
+        document.getElementById('sum-tasks').innerText = `${doneCount}/${projects.length}`;
+        const eff = p13Goal > 0 ? Math.round((p13Done/p13Goal)*100) : 0;
+        document.getElementById('sum-eff').innerText = `${eff}%`;
     }
 
-    // --- TIMER LOGIC (V8 ENGINE) ---
+    // --- RINGS (Fix 1) ---
+    function updateRings() {
+        // Tid (17h)
+        const h = new Date().getHours() + new Date().getMinutes()/60;
+        const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
+        setRing('ring-day', dayPct, '#666');
+
+        // Budget (Prio 1-3)
+        const d = getTodayData();
+        let goal = 0, done = 0;
+        projects.filter(p => p.prio <= 3).forEach(p => {
+            goal += p.target;
+            done += Math.min(p.target, (d[p.id] || 0));
+        });
+        const budgetPct = goal > 0 ? done/goal : 0;
+        const color = budgetPct >= 1 ? 'var(--gold)' : '#ff8800';
+        setRing('ring-budget', budgetPct, color);
+    }
+
+    function setRing(id, pct, color) {
+        const circle = document.getElementById(id);
+        const r = circle.r.baseVal.value;
+        const c = r * 2 * Math.PI;
+        circle.style.strokeDashoffset = c - (pct * c);
+        circle.style.stroke = color;
+    }
+
+    // --- TIMER LOGIC ---
     function toggleTask(id) {
         vibrate(20);
         const now = Date.now();
-
+        
         if (activeTask && activeTask.id === id) {
-            // DET ÄR DEN AKTIVA UPPGIFTEN
             if (activeTask.state === 'running') {
                 // PAUSA
-                const session = now - activeTask.lastTick;
-                activeTask.accumulated += session;
+                activeTask.accumulated += (now - activeTask.lastTick);
                 activeTask.state = 'paused';
-                activeTask.lastTick = null; // Stoppa klockan
+                activeTask.lastTick = null;
             } else {
-                // FORTSÄTT (RESUME)
+                // RESUME
                 activeTask.state = 'running';
                 activeTask.lastTick = now;
             }
         } else {
-            // NY UPPGIFT
-            if (activeTask) autoStop(); // Stoppa gamla först
-            
-            // Starta ny
-            activeTask = {
-                id: id,
-                state: 'running',
-                accumulated: 0,
-                lastTick: now
-            };
+            if(activeTask) autoStop();
+            activeTask = { id: id, state: 'running', accumulated: 0, lastTick: now };
         }
         saveState();
         render();
     }
 
-    function stopTask(id, event) {
-        if(event) event.stopPropagation(); // Förhindra klick på kortet
+    function stopTask(id) {
         vibrate(40);
         autoStop();
         render();
@@ -473,189 +555,195 @@
 
     function autoStop() {
         if(!activeTask) return;
+        let session = 0;
+        if(activeTask.state === 'running') session = Date.now() - activeTask.lastTick;
         
-        // Räkna ut sista sessionen om den körs
-        let finalSession = 0;
-        if(activeTask.state === 'running') {
-            finalSession = Date.now() - activeTask.lastTick;
-        }
+        const totalMs = activeTask.accumulated + session;
+        const mins = Math.floor(totalMs / 60000);
         
-        const totalSessionMs = activeTask.accumulated + finalSession;
-        const totalSessionMins = Math.floor(totalSessionMs / 60000);
-        
-        if(totalSessionMins > 0) {
-            commitTime(activeTask.id, totalSessionMins);
-        }
-        
+        if(mins > 0) commitTime(activeTask.id, mins);
         activeTask = null;
         saveState();
     }
 
     function commitTime(id, mins) {
         const d = getTodayStr();
+        const oldTotal = history[d][id] || 0;
+        
         if(!history[d]) history[d] = {};
         if(!history[d][id]) history[d][id] = 0;
-        
         history[d][id] += mins;
         
-        // Spara för Undo
+        // Fix 2: Confetti check
+        const p = projects.find(x => x.id === id);
+        const newTotal = history[d][id];
+        if(oldTotal < p.target && newTotal >= p.target) {
+            setTimeout(triggerConfetti, 500); // Liten delay för effekt
+            vibrate([100, 50, 100]);
+        }
+
         lastLog = { date: d, id: id, mins: mins };
-        showToast();
+        document.getElementById('toast').classList.add('show');
+        setTimeout(()=>document.getElementById('toast').classList.remove('show'), 5000);
         saveState();
     }
 
-    // --- LIVE UPDATE LOOP ---
-    setInterval(() => {
-        if(activeTask) {
-            const badge = document.getElementById(`badge-${activeTask.id}`);
-            if(badge) {
-                let currentMs = activeTask.accumulated;
-                if(activeTask.state === 'running') {
-                    currentMs += (Date.now() - activeTask.lastTick);
-                }
-                
-                // Formatera MM:SS
-                const totalSec = Math.floor(currentMs / 1000);
-                const m = Math.floor(totalSec / 60);
-                const s = totalSec % 60;
-                
-                badge.innerText = `${m}:${String(s).padStart(2,'0')}`;
-                
-                if(activeTask.state === 'paused') {
-                    badge.innerText = "PAUS";
-                }
-            }
-        }
-        
-        // Klocka
-        const d = new Date();
-        document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        
-    }, 1000);
-
-    // --- LONG PRESS (+5 MIN) ---
-    let touchTimer;
-    function handleTouchStart(id) {
-        touchTimer = setTimeout(() => {
+    // --- LONG PRESS +5 ---
+    let pressTimer;
+    function startLongPress(id) {
+        pressTimer = setTimeout(() => {
             vibrate(100);
-            commitTime(id, 5); // Lägg till 5 min
-            alert(`+5 min tillagt på ${projects.find(p=>p.id===id).title}`);
+            commitTime(id, 5);
             render();
-        }, 800); // 800ms hold
+            alert("+5 minuter tillagt!");
+        }, 800);
     }
-    function handleTouchEnd() { clearTimeout(touchTimer); }
+    function cancelLongPress() { clearTimeout(pressTimer); }
 
-    // --- UNDO SYSTEM ---
-    function showToast() {
-        const t = document.getElementById('toast');
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 5000);
-    }
-    function undoLast() {
-        if(lastLog) {
-            history[lastLog.date][lastLog.id] -= lastLog.mins;
-            lastLog = null;
-            document.getElementById('toast').classList.remove('show');
-            saveState();
-            render();
-            alert("Tiden ångrad.");
-        }
-    }
-
-    // --- STATS ENGINE (SVG GRAPHS) ---
+    // --- STATS (Fix 3) ---
     function renderStats() {
-        // Vecka Chart
-        const wContainer = document.getElementById('week-chart');
-        wContainer.innerHTML = '';
+        // Week Chart
+        const cont = document.getElementById('week-chart');
+        cont.innerHTML = '';
         const days = ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'];
+        let max = 1;
         
-        let maxVal = 1;
+        // Samla data sista 7 dagarna
         let weekData = [];
-        
+        let dist = {1:0, 2:0, 3:0, 4:0};
+
         for(let i=6; i>=0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dStr = d.toISOString().split('T')[0];
-            const dayData = history[dStr] || {};
-            const total = Object.values(dayData).reduce((a,b)=>a+b,0);
-            if(total > maxVal) maxVal = total;
-            weekData.push({ day: days[d.getDay()], val: total });
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const ds = d.toISOString().split('T')[0];
+            const data = history[ds] || {};
+            let daySum = 0;
+            
+            Object.keys(data).forEach(pid => {
+                const m = data[pid];
+                daySum += m;
+                const p = projects.find(x=>x.id===pid);
+                if(p) dist[p.prio > 3 ? 4 : p.prio] += m;
+            });
+            if(daySum > max) max = daySum;
+            weekData.push({ day: days[d.getDay()], val: daySum });
         }
 
+        // Rita Chart
         weekData.forEach(d => {
-            const h = (d.val / maxVal) * 100; // Höjd i %
-            const color = d.val > 480 ? '#4caf50' : '#444'; // Grön om > 8h
-            wContainer.innerHTML += `
-                <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
-                    <div style="height:100px; width:100%; display:flex; align-items:flex-end; background:#222; border-radius:4px;">
-                        <div style="width:100%; background:${color}; height:${h}%; border-radius:4px;"></div>
-                    </div>
-                    <span style="font-size:0.6rem; color:#666; margin-top:5px;">${d.day}</span>
-                </div>
-            `;
+            const h = (d.val / max) * 100;
+            const bg = d.val > 480 ? '#4caf50' : '#444';
+            cont.innerHTML += `
+                <div class="chart-col">
+                    <div class="chart-bar" style="height:${h}%; background:${bg}"></div>
+                    <span class="chart-day">${d.day}</span>
+                </div>`;
         });
-        wContainer.style.display = "flex";
-        wContainer.style.justifyContent = "space-between";
+
+        // Rita Fördelning (Fix 3)
+        const distCont = document.getElementById('prio-breakdown');
+        distCont.innerHTML = '';
+        const totalW = Object.values(dist).reduce((a,b)=>a+b,0);
+        
+        const configs = [
+            { id:1, label:'Tung (P1)', grad:'var(--p1-grad)' },
+            { id:2, label:'Balans (P2)', grad:'var(--p2-grad)' },
+            { id:3, label:'Grund (P3)', grad:'var(--p3-grad)' },
+            { id:4, label:'Framtid', grad:'var(--p46-grad)' }
+        ];
+
+        configs.forEach(c => {
+            const val = dist[c.id];
+            const pct = totalW > 0 ? Math.round((val/totalW)*100) : 0;
+            distCont.innerHTML += `
+                <div class="dist-bar">
+                    <div class="dist-label">${c.label}</div>
+                    <div class="dist-track">
+                        <div class="dist-fill" style="width:${pct}%; background:${c.grad}">${pct > 10 ? formatTime(val) : ''}</div>
+                    </div>
+                    <div style="font-size:0.75rem; font-weight:bold; width:35px;">${pct}%</div>
+                </div>`;
+        });
     }
 
-    // --- UTILS & EXPORT ---
+    // --- UTILS ---
+    function formatTime(m) { return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm'; }
+    function formatTimeShort(m) { return m >= 60 ? Math.round(m/60) + 'h' : m + 'm'; }
+    
     function setFilter(mode, btn) {
         filterMode = mode;
-        document.querySelectorAll('.filter-pill').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.filter-pill').forEach(el=>el.classList.remove('active'));
         btn.classList.add('active');
         render();
     }
-
-    function switchView(view, btn) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.getElementById(`view-${view}`).classList.add('active');
-        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
-        if(view === 'stats') renderStats();
-    }
-
-    function formatTime(m) { return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm'; }
     
-    function calculateStreak(id) {
-        let streak = 0;
-        // Kolla bakåt 30 dagar
-        for(let i=0; i<30; i++) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dStr = d.toISOString().split('T')[0];
-            if(history[dStr] && history[dStr][id] > 10) streak++; // Minst 10 min för streak
-            else if(i > 0) break; // Avbruten streak (men tillåt dagens nolla om man inte börjat än)
+    function switchView(v, btn) {
+        document.querySelectorAll('.view-section').forEach(el=>el.classList.remove('active'));
+        document.getElementById(`view-${v}`).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+        btn.classList.add('active');
+        if(v==='stats') renderStats();
+    }
+    
+    function openSettings() { document.getElementById('modal-settings').style.display='flex'; }
+    
+    function undoLast() {
+        if(!lastLog) return;
+        history[lastLog.date][lastLog.id] -= lastLog.mins;
+        saveState();
+        document.getElementById('toast').classList.remove('show');
+        lastLog = null;
+        render();
+    }
+
+    // Live Loop
+    setInterval(() => {
+        // Klocka
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        
+        // Timer
+        if(activeTask && activeTask.state === 'running') {
+            const ms = activeTask.accumulated + (Date.now() - activeTask.lastTick);
+            const totalSec = Math.floor(ms/1000);
+            const txt = `${Math.floor(totalSec/60)}:${String(totalSec%60).padStart(2,'0')}`;
+            const el = document.getElementById(`badge-${activeTask.id}`);
+            if(el) el.innerText = txt;
         }
-        return streak;
-    }
+    }, 1000);
 
+    // Confetti
+    function triggerConfetti() {
+        const c = document.getElementById('confetti');
+        const ctx = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight;
+        let p = [];
+        for(let i=0; i<100; i++) p.push({
+            x: c.width/2, y: c.height/2, vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20,
+            color: `hsl(${Math.random()*360},100%,50%)`, life: 100
+        });
+        function step() {
+            ctx.clearRect(0,0,c.width,c.height);
+            p.forEach((k,i)=>{ k.x+=k.vx; k.y+=k.vy; k.vy+=0.5; k.life--; ctx.fillStyle=k.color; ctx.fillRect(k.x,k.y,5,5); if(k.life<0)p.splice(i,1); });
+            if(p.length) requestAnimationFrame(step);
+        }
+        step();
+    }
+    
+    // Import/Export
     function exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history));
-        const anchor = document.createElement('a');
-        anchor.setAttribute("href", dataStr);
-        anchor.setAttribute("download", "khalifa_backup.json");
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
+        const a = document.createElement('a');
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history));
+        a.download = "khalifa_backup.json";
+        a.click();
     }
-
-    function importData(input) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                history = JSON.parse(e.target.result);
-                saveState();
-                alert("Import lyckades!");
-                render();
-            } catch(err) { alert("Fel på filen!"); }
-        };
-        reader.readAsText(file);
+    function importData(inp) {
+        const r = new FileReader();
+        r.onload = e => { history=JSON.parse(e.target.result); saveState(); alert("Klart!"); render(); };
+        r.readAsText(inp.files[0]);
     }
 
     // INIT
     render();
-
 </script>
 </body>
 </html>
