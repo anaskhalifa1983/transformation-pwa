@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050505">
-    <title>Khalifa Commander V11</title>
+    <title>Khalifa Commander V12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -104,7 +104,7 @@
         .task-card:active { transform: scale(0.98); }
 
         /* THE CHARGING ANIMATION */
-        .task-card.pressing { transform: scale(0.95); transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .task-card.pressing { transform: scale(0.95); transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
         /* GRADIENT BORDERS */
         .prio-1 { border-left: 4px solid #ff2c2c; }
@@ -234,7 +234,7 @@
         <div class="top-deck">
             <div class="clock-area">
                 <h1 id="clock">07:00</h1>
-                <p>COMMANDER V11</p>
+                <p>COMMANDER V12</p>
             </div>
             
             <div class="header-right">
@@ -313,6 +313,10 @@
             <button class="modal-btn" onclick="document.getElementById('file-input').click()"><i class="fas fa-upload"></i> Importera Data</button>
             <input type="file" id="file-input" style="display:none" onchange="importData(this)">
             
+            <button class="modal-btn" style="background:#8b0000; margin-top:20px;" onclick="confirmReset()">
+                <i class="fas fa-exclamation-triangle"></i> Nollställ Dagens Data
+            </button>
+
             <button class="modal-btn" style="background:#444; margin-top:10px;" onclick="document.getElementById('modal-settings').style.display='none'">Stäng</button>
         </div>
     </div>
@@ -354,12 +358,12 @@
     const SLEEP_TIME = 24;
 
     // --- STATE MANAGER ---
-    let history = JSON.parse(localStorage.getItem('khalifa_v11_hist')) || {};
-    // SESSIONS: { 'yt_long': { accumulated: 0, state: 'running'|'paused', startTime: 123456 }, ... }
-    let sessions = JSON.parse(localStorage.getItem('khalifa_v11_sessions')) || {};
-    let workGoal = parseInt(localStorage.getItem('khalifa_v11_goal')) || 840; 
+    let history = JSON.parse(localStorage.getItem('khalifa_v12_hist')) || {};
+    let sessions = JSON.parse(localStorage.getItem('khalifa_v12_sessions')) || {};
+    let workGoal = parseInt(localStorage.getItem('khalifa_v12_goal')) || 840; 
+    let undoStack = JSON.parse(localStorage.getItem('khalifa_v12_undo')) || [];
+    const MAX_UNDO = 10;
     
-    let lastLog = null;
     let filterMode = 'today';
     let cachedStreaks = {}; 
 
@@ -371,9 +375,10 @@
         return history[d];
     }
     function saveState() {
-        localStorage.setItem('khalifa_v11_hist', JSON.stringify(history));
-        localStorage.setItem('khalifa_v11_sessions', JSON.stringify(sessions));
-        localStorage.setItem('khalifa_v11_goal', workGoal);
+        localStorage.setItem('khalifa_v12_hist', JSON.stringify(history));
+        localStorage.setItem('khalifa_v12_sessions', JSON.stringify(sessions));
+        localStorage.setItem('khalifa_v12_goal', workGoal);
+        localStorage.setItem('khalifa_v12_undo', JSON.stringify(undoStack));
     }
     function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
@@ -491,9 +496,11 @@
             const html = `
                 <div class="${classes}" id="card-${p.id}" 
                      oncontextmenu="return false;" 
-                     ontouchstart="startLongPress('${p.id}')" 
+                     ontouchstart="startLongPress('${p.id}', event)" 
+                     ontouchmove="trackMovement(event)"
                      ontouchend="cancelLongPress()"
-                     onmousedown="startLongPress('${p.id}')" 
+                     onmousedown="startLongPress('${p.id}', event)" 
+                     onmousemove="trackMovement(event)"
                      onmouseup="cancelLongPress()">
                      
                     <div class="card-top">
@@ -519,7 +526,7 @@
         });
     }
 
-    // --- SUMMARY CARD (INKLUDERAR PÅGÅENDE) ---
+    // --- SUMMARY CARD ---
     function renderSummary() {
         const d = getTodayData();
         let total = 0, doneCount = 0;
@@ -580,7 +587,7 @@
         circle.style.stroke = color;
     }
 
-    // --- MULTI-SESSION LOGIC (V11) ---
+    // --- MULTI-SESSION LOGIC ---
     function toggleTask(id, e) {
         if(e) e.stopPropagation();
         vibrate(20);
@@ -593,12 +600,12 @@
                 sessions[id].state = 'paused';
                 sessions[id].startTime = null;
             } else if (sessions[id].state === 'paused') {
-                // FORTSÄTT DETTA PROJEKT (Påverkar ej andra)
+                // FORTSÄTT DETTA PROJEKT
                 sessions[id].state = 'running';
                 sessions[id].startTime = now;
             }
         } else {
-            // NY SESSION (Startar parallellt med andra)
+            // NY SESSION
             sessions[id] = { accumulated: 0, state: 'running', startTime: now };
         }
         
@@ -624,7 +631,7 @@
         // Commit om > 0
         if(mins > 0) commitTime(id, mins);
         
-        // RADERA SESSIONEN (Den är nu committad)
+        // RADERA SESSIONEN
         delete sessions[id];
         
         saveState();
@@ -647,24 +654,55 @@
             vibrate([100, 50, 100]);
         }
 
-        lastLog = { date: d, id: id, mins: mins };
-        showToast("💾 Tid sparad.", true);
+        // UNDO STACK
+        undoStack.push({ date: d, id: id, mins: mins, timestamp: Date.now() });
+        if(undoStack.length > MAX_UNDO) undoStack.shift();
+
+        showToast(`💾 ${mins}m sparad.`, true);
         saveState();
     }
 
-    // --- LONG PRESS +5 ---
+    // --- SECURE LONG PRESS +5 ---
     let pressTimer;
-    function startLongPress(id) {
+    let pressStartX = 0, pressStartY = 0, hasMoved = false;
+
+    function startLongPress(id, e) {
+        if(e.touches) {
+            pressStartX = e.touches[0].clientX;
+            pressStartY = e.touches[0].clientY;
+        } else {
+            pressStartX = e.clientX;
+            pressStartY = e.clientY;
+        }
+        hasMoved = false;
+        
         const card = document.getElementById(`card-${id}`);
         card.classList.add('pressing');
         
         pressTimer = setTimeout(() => {
-            vibrate(100);
-            commitTime(id, 5);
-            card.classList.remove('pressing'); 
-            showToast("⚡ +5 minuter tillagt!", false);
-            render();
-        }, 800);
+            if(!hasMoved) {
+                vibrate(100);
+                commitTime(id, 5);
+                card.classList.remove('pressing'); 
+                showToast("⚡ +5 minuter tillagt!", true);
+                render();
+            }
+        }, 1200); // 1.2 sec
+    }
+    
+    function trackMovement(e) {
+        let curX, curY;
+        if(e.touches) {
+            curX = e.touches[0].clientX;
+            curY = e.touches[0].clientY;
+        } else {
+            curX = e.clientX;
+            curY = e.clientY;
+        }
+        if(Math.abs(curX - pressStartX) > 10 || Math.abs(curY - pressStartY) > 10) {
+            hasMoved = true;
+            cancelLongPress();
+        }
     }
     
     function cancelLongPress() { 
@@ -672,7 +710,41 @@
         document.querySelectorAll('.task-card').forEach(c => c.classList.remove('pressing'));
     }
 
-    // --- LIVE LOOP (V11 MULTI) ---
+    // --- UNDO SYSTEM ---
+    function undoLast() {
+        if(undoStack.length === 0) return;
+        
+        const action = undoStack.pop();
+        history[action.date][action.id] -= action.mins;
+        if(history[action.date][action.id] < 0) history[action.date][action.id] = 0;
+        
+        saveState();
+        document.getElementById('toast').classList.remove('show');
+        
+        // Uppdatera toast om fler finns
+        if(undoStack.length > 0) {
+            setTimeout(() => {
+                showToast(`Tid ångrad. ${undoStack.length} kvar.`, true);
+            }, 300);
+        }
+        
+        render();
+    }
+    
+    function confirmReset() {
+        if(confirm("⚠️ VARNING: Detta raderar ALL dagens data (committed och timers). Går INTE att ångra. Fortsätta?")) {
+            const d = getTodayStr();
+            if(history[d]) delete history[d];
+            sessions = {};
+            undoStack = [];
+            saveState();
+            render();
+            document.getElementById('modal-settings').style.display='none';
+            showToast("🔄 Dagen nollställd.", false);
+        }
+    }
+
+    // --- LIVE LOOP ---
     setInterval(() => {
         const now = new Date();
         document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -680,8 +752,7 @@
         // Uppdatera alla RUNNING sessions
         Object.keys(sessions).forEach(id => {
             if(sessions[id].state === 'running') {
-                const elapsed = Date.now() - sessions[id].startTime;
-                const ms = sessions[id].accumulated + elapsed;
+                const ms = sessions[id].accumulated + (Date.now() - sessions[id].startTime);
                 const totalSec = Math.floor(ms/1000);
                 const txt = `${Math.floor(totalSec/60)}:${String(totalSec%60).padStart(2,'0')}`;
                 
@@ -691,7 +762,7 @@
         });
     }, 1000);
 
-    // --- SETTINGS, TOAST, STATS, UTILS (Standard) ---
+    // --- STANDARD FUNCTIONS (Stats, Settings, Utils) ---
     
     function updateGoal(val) {
         workGoal = parseInt(val);
@@ -710,7 +781,15 @@
     function showToast(msg, allowUndo) {
         const t = document.getElementById('toast');
         t.querySelector('.toast-msg').innerHTML = msg;
-        document.getElementById('toast-undo-btn').style.display = allowUndo ? 'block' : 'none';
+        const uBtn = document.getElementById('toast-undo-btn');
+        
+        if(allowUndo) {
+            uBtn.style.display = 'block';
+            uBtn.innerText = undoStack.length > 0 ? `ÅNGRA (${undoStack.length})` : 'ÅNGRA';
+        } else {
+            uBtn.style.display = 'none';
+        }
+
         t.classList.add('show');
         setTimeout(()=>t.classList.remove('show'), 4000);
     }
@@ -790,15 +869,6 @@
         if(v==='stats') renderStats();
     }
     
-    function undoLast() {
-        if(!lastLog) return;
-        history[lastLog.date][lastLog.id] -= lastLog.mins;
-        saveState();
-        document.getElementById('toast').classList.remove('show');
-        lastLog = null;
-        render();
-    }
-
     function triggerConfetti() {
         const c = document.getElementById('confetti');
         const ctx = c.getContext('2d');
@@ -815,7 +885,7 @@
     
     function exportData() {
         const a = document.createElement('a');
-        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({history, sessions}));
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({history, sessions, undoStack}));
         a.download = "khalifa_backup.json";
         a.click();
     }
@@ -825,6 +895,7 @@
             const d = JSON.parse(e.target.result);
             if(d.history) history = d.history;
             if(d.sessions) sessions = d.sessions;
+            if(d.undoStack) undoStack = d.undoStack;
             saveState(); alert("Klart!"); render(); 
         };
         r.readAsText(inp.files[0]);
