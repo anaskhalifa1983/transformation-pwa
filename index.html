@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050505">
-    <title>Khalifa Commander V9</title>
+    <title>Khalifa Commander V10</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -99,9 +99,18 @@
         .task-card {
             background: var(--card-bg); margin: 0 20px 15px 20px; padding: 18px;
             border-radius: 16px; border: 1px solid #222;
-            position: relative; overflow: hidden; transition: transform 0.1s;
+            position: relative; overflow: hidden; 
+            
+            /* ANIMATION SETUP */
+            transform: scale(1);
+            transition: transform 0.2s ease-out; /* Snabb återgång */
         }
-        .task-card:active { transform: scale(0.98); }
+        
+        /* THE CHARGING ANIMATION */
+        .task-card.pressing {
+            transform: scale(0.95);
+            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); /* Långsam laddning */
+        }
 
         /* GRADIENT BORDERS & MARKERS */
         .prio-1 { border-left: 4px solid #ff2c2c; }
@@ -203,14 +212,18 @@
         }
         .toast.show { transform: translateY(0); }
         .btn-undo { background: none; border: 1px solid #555; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
+        .toast-msg { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
 
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:300; align-items:center; justify-content:center; }
+        /* SETTINGS MODAL */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:300; align-items:center; justify-content:center; }
         .modal-content { background:#222; padding:25px; border-radius:15px; width:85%; text-align:center; border: 1px solid #444; }
         .modal-btn { width:100%; padding:15px; background:#333; border:none; color:#fff; border-radius:8px; margin-bottom:10px; font-weight:bold; font-size: 1rem; }
+        .slider-container { margin: 20px 0; text-align: left; }
+        input[type=range] { width: 100%; margin-top: 10px; }
         
         #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
 
-        @keyframes pulseYellow { 0% { border-color: #ffb74d; } 50% { border-color: #664a1f; } 100% { border-color: #ffb74d; } }
+        @keyframes pulseYellow { 0% { border-color: #ffb74d; } 50% { border-color: #554010; } 100% { border-color: #ffb74d; } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
     </style>
@@ -224,7 +237,7 @@
         <div class="top-deck">
             <div class="clock-area">
                 <h1 id="clock">07:00</h1>
-                <p>COMMANDER V9</p>
+                <p>COMMANDER V10</p>
             </div>
             
             <div class="header-right">
@@ -237,7 +250,7 @@
                         </svg>
                         <div class="ring-icon">🕒</div>
                     </div>
-                    <!-- Ring 2: Budget (Prio 1-3) -->
+                    <!-- Ring 2: Budget -->
                     <div class="ring-box">
                         <svg class="ring-svg" viewBox="0 0 50 50">
                             <circle class="ring-bg" cx="25" cy="25" r="20"></circle>
@@ -259,11 +272,11 @@
 
     <!-- MAIN DASHBOARD -->
     <div id="view-today" class="view-section active">
-        <!-- FIXED SUMMARY CARD (Fix 4) -->
+        <!-- FIXED SUMMARY CARD -->
         <div class="summary-card">
             <div>
                 <span class="sum-val" id="sum-time">0h 0m</span>
-                <span class="sum-label">Total Tid</span>
+                <span class="sum-label">Totalt Idag</span>
             </div>
             <div class="sum-sep"></div>
             <div>
@@ -273,7 +286,7 @@
             <div class="sum-sep"></div>
             <div>
                 <span class="sum-val" id="sum-eff">0%</span>
-                <span class="sum-label">Prio 1-3</span>
+                <span class="sum-label">Av Dagens Mål</span>
             </div>
         </div>
 
@@ -289,21 +302,28 @@
         <div id="prio-breakdown"></div>
     </div>
 
-    <!-- SETTINGS MODAL (Fix 5) -->
+    <!-- SETTINGS MODAL -->
     <div id="modal-settings" class="modal" onclick="if(event.target===this) this.style.display='none'">
         <div class="modal-content">
             <h3>Inställningar</h3>
+            
+            <div class="slider-container">
+                <label style="color:#aaa; font-size:0.9rem;">Dagens Mål: <span id="goal-display" style="color:#fff; font-weight:bold;">14h</span></label>
+                <input type="range" id="goal-slider" min="60" max="1020" step="30" oninput="updateGoal(this.value)">
+            </div>
+
             <button class="modal-btn" onclick="exportData()"><i class="fas fa-download"></i> Exportera Data</button>
             <button class="modal-btn" onclick="document.getElementById('file-input').click()"><i class="fas fa-upload"></i> Importera Data</button>
             <input type="file" id="file-input" style="display:none" onchange="importData(this)">
+            
             <button class="modal-btn" style="background:#444; margin-top:10px;" onclick="document.getElementById('modal-settings').style.display='none'">Stäng</button>
         </div>
     </div>
 
-    <!-- UNDO TOAST -->
+    <!-- TOAST (MULTI-PURPOSE) -->
     <div id="toast" class="toast">
-        <span><i class="fas fa-save"></i> Tid sparad.</span>
-        <button class="btn-undo" onclick="undoLast()">ÅNGRA</button>
+        <span class="toast-msg"><i class="fas fa-info-circle"></i> Meddelande</span>
+        <button id="toast-undo-btn" class="btn-undo" onclick="undoLast()">ÅNGRA</button>
     </div>
 
     <!-- BOTTOM NAV -->
@@ -337,11 +357,13 @@
     const SLEEP_TIME = 24;
 
     // --- STATE ---
-    let history = JSON.parse(localStorage.getItem('khalifa_v9_hist')) || {};
-    let activeTask = JSON.parse(localStorage.getItem('khalifa_v9_active')) || null;
+    let history = JSON.parse(localStorage.getItem('khalifa_v10_hist')) || {};
+    let activeTask = JSON.parse(localStorage.getItem('khalifa_v10_active')) || null;
+    let workGoal = parseInt(localStorage.getItem('khalifa_v10_goal')) || 840; // 14h default
+    
     let lastLog = null;
     let filterMode = 'today';
-    let cachedStreaks = {}; // Optimization (Fix 8)
+    let cachedStreaks = {}; 
 
     // --- CORE ---
     function getTodayStr() { return new Date().toISOString().split('T')[0]; }
@@ -351,12 +373,13 @@
         return history[d];
     }
     function saveState() {
-        localStorage.setItem('khalifa_v9_hist', JSON.stringify(history));
-        localStorage.setItem('khalifa_v9_active', JSON.stringify(activeTask));
+        localStorage.setItem('khalifa_v10_hist', JSON.stringify(history));
+        localStorage.setItem('khalifa_v10_active', JSON.stringify(activeTask));
+        localStorage.setItem('khalifa_v10_goal', workGoal);
     }
     function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
-    // --- STREAK OPTIMIZATION (Fix 8) ---
+    // --- STREAK OPTIMIZATION ---
     function updateStreaks() {
         cachedStreaks = {};
         projects.forEach(p => {
@@ -384,7 +407,7 @@
         list.innerHTML = '';
         const todayData = getTodayData();
 
-        // 1. Gruppera data för zon-headers (Fix 10)
+        // Group data
         let zoneStats = { 1:{done:0, target:0}, 2:{done:0, target:0}, 3:{done:0, target:0}, 4:{done:0, target:0} };
         projects.forEach(p => {
             const z = p.prio > 3 ? 4 : p.prio;
@@ -399,11 +422,8 @@
             if(filterMode === 'today' && p.prio > 3) return;
             if(filterMode === 'todo' && (todayData[p.id] || 0) >= p.target) return;
 
-            // RENDER ZONE HEADER (Fix 10)
+            // RENDER ZONE HEADER
             if(p.prio !== lastPrio) {
-                // Om vi hoppar från 1 till 2, skriv ut header för 2
-                // Men om filter döljer alla 4-6, skriv inte ut 4
-                
                 let z = p.prio > 3 ? 4 : p.prio;
                 let label = "FRAMTID";
                 let icon = "🚀";
@@ -411,7 +431,6 @@
                 if(z===2) { label="BALANS"; icon="⚖️"; }
                 if(z===3) { label="GRUND"; icon="⚓️"; }
 
-                // Formatera tid för header
                 const doneH = formatTimeShort(zoneStats[z].done);
                 const targH = formatTimeShort(zoneStats[z].target);
 
@@ -444,7 +463,6 @@
             let timeTxt = formatTime(totalMins);
             if(isActive && !isPaused) timeTxt = "REC...";
             
-            // PAUS TEXT (Fix 9)
             if(isPaused) {
                 const m = Math.floor(activeTask.accumulated / 60000);
                 const s = Math.floor((activeTask.accumulated % 60000) / 1000);
@@ -453,8 +471,15 @@
 
             const streakHtml = streak > 0 ? `<span style="color:#ff9800; font-size:0.7rem; margin-left:5px;">🔥 ${streak}</span>` : '';
 
+            // Note: oncontextmenu prevents long press menu on mobile
             const html = `
-                <div class="${classes}" id="card-${p.id}" oncontextmenu="return false;" onmousedown="startLongPress('${p.id}')" onmouseup="cancelLongPress()" ontouchstart="startLongPress('${p.id}')" ontouchend="cancelLongPress()">
+                <div class="${classes}" id="card-${p.id}" 
+                     oncontextmenu="return false;" 
+                     ontouchstart="startLongPress('${p.id}')" 
+                     ontouchend="cancelLongPress()"
+                     onmousedown="startLongPress('${p.id}')" 
+                     onmouseup="cancelLongPress()">
+                     
                     <div class="card-top">
                         <div style="flex-grow:1">
                             <span class="task-title">${p.icon} ${p.title}</span>
@@ -462,8 +487,8 @@
                         </div>
                         <div class="control-group">
                             <div class="timer-badge" id="badge-${p.id}">${timeTxt}</div>
-                            <button class="btn-stop" onclick="stopTask('${p.id}')"><i class="fas fa-stop"></i></button>
-                            <button class="btn-main" onclick="toggleTask('${p.id}')">${btnIcon}</button>
+                            <button class="btn-stop" onclick="stopTask('${p.id}', event)"><i class="fas fa-stop"></i></button>
+                            <button class="btn-main" onclick="toggleTask('${p.id}', event)">${btnIcon}</button>
                         </div>
                     </div>
                     <div class="card-progress-bg">
@@ -475,42 +500,34 @@
         });
     }
 
-    // --- SUMMARY CARD (Fix 4) ---
+    // --- SUMMARY CARD ---
     function renderSummary() {
         const d = getTodayData();
-        let total = 0, doneCount = 0, p13Goal = 0, p13Done = 0;
+        let total = 0, doneCount = 0;
         
         projects.forEach(p => {
             const m = d[p.id] || 0;
             total += m;
             if(m >= p.target) doneCount++;
-            if(p.prio <= 3) {
-                p13Goal += p.target;
-                p13Done += Math.min(p.target, m);
-            }
         });
 
         document.getElementById('sum-time').innerText = formatTime(total);
         document.getElementById('sum-tasks').innerText = `${doneCount}/${projects.length}`;
-        const eff = p13Goal > 0 ? Math.round((p13Done/p13Goal)*100) : 0;
+        const eff = workGoal > 0 ? Math.round((total/workGoal)*100) : 0;
         document.getElementById('sum-eff').innerText = `${eff}%`;
     }
 
-    // --- RINGS (Fix 1) ---
+    // --- RINGS ---
     function updateRings() {
-        // Tid (17h)
         const h = new Date().getHours() + new Date().getMinutes()/60;
         const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
         setRing('ring-day', dayPct, '#666');
 
-        // Budget (Prio 1-3)
         const d = getTodayData();
-        let goal = 0, done = 0;
-        projects.filter(p => p.prio <= 3).forEach(p => {
-            goal += p.target;
-            done += Math.min(p.target, (d[p.id] || 0));
-        });
-        const budgetPct = goal > 0 ? done/goal : 0;
+        let total = 0;
+        projects.filter(p => p.prio <= 3).forEach(p => total += (d[p.id] || 0));
+        
+        const budgetPct = workGoal > 0 ? total/workGoal : 0;
         const color = budgetPct >= 1 ? 'var(--gold)' : '#ff8800';
         setRing('ring-budget', budgetPct, color);
     }
@@ -524,18 +541,17 @@
     }
 
     // --- TIMER LOGIC ---
-    function toggleTask(id) {
+    function toggleTask(id, e) {
+        if(e) e.stopPropagation(); // Stop long press conflict
         vibrate(20);
         const now = Date.now();
         
         if (activeTask && activeTask.id === id) {
             if (activeTask.state === 'running') {
-                // PAUSA
                 activeTask.accumulated += (now - activeTask.lastTick);
                 activeTask.state = 'paused';
                 activeTask.lastTick = null;
             } else {
-                // RESUME
                 activeTask.state = 'running';
                 activeTask.lastTick = now;
             }
@@ -547,7 +563,8 @@
         render();
     }
 
-    function stopTask(id) {
+    function stopTask(id, e) {
+        if(e) e.stopPropagation();
         vibrate(40);
         autoStop();
         render();
@@ -574,41 +591,71 @@
         if(!history[d][id]) history[d][id] = 0;
         history[d][id] += mins;
         
-        // Fix 2: Confetti check
         const p = projects.find(x => x.id === id);
         const newTotal = history[d][id];
         if(oldTotal < p.target && newTotal >= p.target) {
-            setTimeout(triggerConfetti, 500); // Liten delay för effekt
+            setTimeout(triggerConfetti, 500);
             vibrate([100, 50, 100]);
         }
 
         lastLog = { date: d, id: id, mins: mins };
-        document.getElementById('toast').classList.add('show');
-        setTimeout(()=>document.getElementById('toast').classList.remove('show'), 5000);
+        showToast("💾 Tid sparad.", true);
         saveState();
     }
 
-    // --- LONG PRESS +5 ---
+    // --- LONG PRESS ANIMATION (FIXED) ---
     let pressTimer;
     function startLongPress(id) {
+        const card = document.getElementById(`card-${id}`);
+        // Visual charge
+        card.classList.add('pressing');
+        
         pressTimer = setTimeout(() => {
             vibrate(100);
             commitTime(id, 5);
+            card.classList.remove('pressing'); // Reset scale
+            showToast("⚡ +5 minuter tillagt!", false); // No undo on quick add
             render();
-            alert("+5 minuter tillagt!");
         }, 800);
     }
-    function cancelLongPress() { clearTimeout(pressTimer); }
+    
+    function cancelLongPress() { 
+        clearTimeout(pressTimer);
+        document.querySelectorAll('.task-card').forEach(c => c.classList.remove('pressing'));
+    }
 
-    // --- STATS (Fix 3) ---
+    // --- SETTINGS ---
+    function updateGoal(val) {
+        workGoal = parseInt(val);
+        document.getElementById('goal-display').innerText = formatTime(workGoal);
+        saveState();
+        renderSummary();
+        updateRings();
+    }
+    
+    function openSettings() {
+        document.getElementById('modal-settings').style.display='flex';
+        document.getElementById('goal-slider').value = workGoal;
+        document.getElementById('goal-display').innerText = formatTime(workGoal);
+    }
+
+    // --- TOAST ---
+    function showToast(msg, allowUndo) {
+        const t = document.getElementById('toast');
+        t.querySelector('.toast-msg').innerHTML = msg;
+        document.getElementById('toast-undo-btn').style.display = allowUndo ? 'block' : 'none';
+        
+        t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 4000);
+    }
+
+    // --- STATS ---
     function renderStats() {
-        // Week Chart
         const cont = document.getElementById('week-chart');
         cont.innerHTML = '';
         const days = ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'];
         let max = 1;
         
-        // Samla data sista 7 dagarna
         let weekData = [];
         let dist = {1:0, 2:0, 3:0, 4:0};
 
@@ -628,7 +675,6 @@
             weekData.push({ day: days[d.getDay()], val: daySum });
         }
 
-        // Rita Chart
         weekData.forEach(d => {
             const h = (d.val / max) * 100;
             const bg = d.val > 480 ? '#4caf50' : '#444';
@@ -639,7 +685,6 @@
                 </div>`;
         });
 
-        // Rita Fördelning (Fix 3)
         const distCont = document.getElementById('prio-breakdown');
         distCont.innerHTML = '';
         const totalW = Object.values(dist).reduce((a,b)=>a+b,0);
@@ -684,8 +729,6 @@
         if(v==='stats') renderStats();
     }
     
-    function openSettings() { document.getElementById('modal-settings').style.display='flex'; }
-    
     function undoLast() {
         if(!lastLog) return;
         history[lastLog.date][lastLog.id] -= lastLog.mins;
@@ -697,11 +740,9 @@
 
     // Live Loop
     setInterval(() => {
-        // Klocka
         const now = new Date();
         document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         
-        // Timer
         if(activeTask && activeTask.state === 'running') {
             const ms = activeTask.accumulated + (Date.now() - activeTask.lastTick);
             const totalSec = Math.floor(ms/1000);
