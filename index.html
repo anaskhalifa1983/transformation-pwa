@@ -2,417 +2,439 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHALIFA OS - FINAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>Khalifa OS</title>
+    
+    <!-- PWA Manifest Hack för Single File -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Khalifa OS","short_name":"K-OS","display":"standalone","start_url":".","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://api.iconify.design/ri:focus-3-line.svg?color=%23ff9800","sizes":"192x192","type":"image/svg+xml"}]}'>
+    <link rel="apple-touch-icon" href="https://api.iconify.design/ri:focus-3-line.svg?color=%23ff9800">
+
     <style>
         :root {
-            --bg-color: #050505;
-            --card-bg: #141414;
-            --text-main: #e0e0e0;
-            --text-muted: #888;
+            --bg: #000000;
+            --card: #111111;
+            --text: #ffffff;
+            --muted: #666;
             
-            --prio1: #ff4444; 
-            --prio2: #ff8800; 
-            --prio3: #2196f3; 
-            --prio46: #aa00ff;
+            --p1: #ff3b30; /* Röd */
+            --p2: #ff9500; /* Orange */
+            --p3: #007aff; /* Blå */
+            --p46: #af52de; /* Lila */
             
-            --gold: #ffd700; /* GULD FÄRG */
-            --gold-bg: #423a05;
+            --gold: #ffd60a; 
+            --gold-glow: rgba(255, 214, 10, 0.2);
+            
+            --btn-bg: #222;
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 15px;
-            padding-top: 150px; /* Plats för header */
-            padding-bottom: 80px;
-            -webkit-user-select: none; /* Förhindra markering text på mobil */
-            user-select: none;
+            padding: 20px;
+            padding-top: 180px; /* Plats för Header */
+            padding-bottom: 100px;
+            overscroll-behavior-y: none; /* Stoppa studsig scroll */
         }
 
-        /* --- HEADER & MÄTARE --- */
+        /* --- HEADER & RINGAR --- */
         .fixed-header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            background: rgba(5,5,5,0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            z-index: 1000;
-            border-bottom: 1px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .clock { font-size: 2rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
-        .timer-btn { 
-            background: #222; border: 1px solid #444; color: #ccc;
-            padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
-        }
-
-        .meter-group { margin-bottom: 8px; }
-        .meter-label { font-size: 0.7rem; color: #666; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .meter-track { background: #222; height: 8px; border-radius: 4px; overflow: hidden; position: relative; }
-        
-        /* Dag-mätare (Tid) */
-        .meter-fill-time { height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336); width: 0%; transition: width 1s linear; }
-        
-        /* Jobb-mätare (Insats) */
-        .meter-fill-work { height: 100%; background: linear-gradient(90deg, #2196f3, #aa00ff); width: 0%; transition: width 0.5s ease; }
-
-        /* --- JOKER / FÖRSLAG --- */
-        .joker-box {
-            background: linear-gradient(135deg, #2a0a36 0%, #141414 100%);
-            border: 1px solid #4a148c;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 25px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .joker-label { color: #d1c4e9; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .joker-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #fff; }
-        .btn-outline { background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; }
-        
-        /* --- ZONER --- */
-        .zone-header {
-            padding: 15px; border-radius: 10px; margin-bottom: 10px; margin-top: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            font-weight: 800; font-size: 1rem; letter-spacing: 0.5px;
-            cursor: pointer; transition: transform 0.1s;
-        }
-        .zone-header:active { transform: scale(0.98); }
-        .arrow { transition: transform 0.3s; opacity: 0.5; }
-        .closed .arrow { transform: rotate(-90deg); }
-
-        .z1 { background: linear-gradient(90deg, #2b0b0b, #141414); border-left: 4px solid var(--prio1); color: #ffcccc; }
-        .z2 { background: linear-gradient(90deg, #2b1b0b, #141414); border-left: 4px solid var(--prio2); color: #ffe0b2; }
-        .z3 { background: linear-gradient(90deg, #0b1b2b, #141414); border-left: 4px solid var(--prio3); color: #bbdefb; }
-
-        .project-list { transition: max-height 0.3s ease; overflow: hidden; }
-        .project-list.closed { display: none; }
-
-        /* --- KORTEN --- */
-        .task-row {
-            background: var(--card-bg);
+            position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 15px 20px; z-index: 100;
             border-bottom: 1px solid #222;
-            padding: 16px;
+            display: grid; grid-template-columns: 1fr auto; align-items: center;
+        }
+
+        .header-left h1 { margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
+        .header-left p { margin: 0; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .rings-container { display: flex; gap: 15px; }
+        
+        /* Cirkel Mätare CSS */
+        .ring-wrapper { position: relative; width: 60px; height: 60px; }
+        .ring-svg { transform: rotate(-90deg); width: 60px; height: 60px; }
+        .ring-bg { fill: none; stroke: #222; stroke-width: 6; }
+        .ring-progress { fill: none; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 150; stroke-dashoffset: 150; transition: stroke-dashoffset 1s ease; }
+        .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; }
+        .ring-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: #888; white-space: nowrap; }
+
+        /* --- JOKER BOX --- */
+        .joker-box {
+            background: linear-gradient(145deg, #1a0b1f 0%, #0a0a0a 100%);
+            border: 1px solid #331144;
+            border-radius: 16px; padding: 20px; text-align: center;
+            margin-bottom: 30px; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .joker-badge { background: #331144; color: #d0aaff; font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        .joker-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; line-height: 1.2; }
+        .joker-btns { display: flex; gap: 10px; justify-content: center; }
+        
+        /* --- KNAPPAR (Generella) --- */
+        .btn {
+            border: none; padding: 10px 20px; border-radius: 12px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: transform 0.1s;
+            display: flex; align-items: center; gap: 6px; justify-content: center;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #aaa; }
+        .btn-timer { background: #222; color: var(--p2); border: 1px solid #332200; }
+
+        /* --- ZONER & LISTOR --- */
+        .zone-title {
+            margin-top: 30px; margin-bottom: 10px; padding: 0 5px;
             display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.3s;
+            font-size: 1rem; font-weight: 700; color: #888;
+        }
+        .zone-badge { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        
+        /* --- KORT DESIGN (Tum-vänlig) --- */
+        .task-card {
+            background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px;
+            border: 1px solid #1a1a1a; transition: all 0.3s ease; position: relative; overflow: hidden;
         }
         
-        /* GULD STATUS (När klar) */
-        .task-row.gold-status {
-            background: linear-gradient(90deg, var(--gold-bg), #141414);
-            border-left: 3px solid var(--gold);
+        /* Guld Status */
+        .task-card.gold {
+            background: linear-gradient(145deg, #1f1c05 0%, #000 100%);
+            border: 1px solid var(--gold);
+            box-shadow: 0 0 15px rgba(255, 214, 10, 0.1);
         }
-        .gold-status .task-name { color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-
-        .task-info { flex-grow: 1; padding-right: 10px; }
-        .task-name { font-size: 1rem; font-weight: 500; display: block; margin-bottom: 4px; }
-        .task-meta { font-size: 0.75rem; color: #555; display: block; }
+        .task-card.gold .task-title { color: var(--gold); }
         
-        .btn-add {
-            background: #252525; border: none; color: #fff;
-            width: 44px; height: 34px; border-radius: 6px;
-            font-weight: 700; font-size: 0.9rem;
-            cursor: pointer; transition: background 0.2s;
+        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .task-title { font-size: 1.1rem; font-weight: 600; display: block; margin-bottom: 4px; }
+        .task-meta { font-size: 0.8rem; color: var(--muted); }
+        .task-current { font-family: monospace; font-size: 0.9rem; background: #000; padding: 4px 8px; border-radius: 6px; color: #fff; }
+
+        /* ACTION BAR (Knappar underst) */
+        .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .action-btn {
+            background: var(--btn-bg); color: #fff; border: none;
+            padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1rem;
+            position: relative; overflow: hidden;
         }
-        .btn-add:active { background: #fff; color: #000; }
+        /* Ripple effect fix */
+        .action-btn::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.05); opacity:0; transition: opacity 0.2s;}
+        .action-btn:active::after { opacity: 1; }
+        .action-btn:active { transform: scale(0.98); background: #333; }
 
-        /* Extra Listan */
-        .extra-list { display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; text-align: left; }
-        .extra-list.show { display: block; }
-
-        /* Backup Section */
-        .backup-section { text-align: center; margin-top: 50px; padding: 20px; border-top: 1px solid #222; }
-        .backup-text { font-size: 0.7rem; color: #444; word-break: break-all; margin-top: 10px; display: none; user-select: text; -webkit-user-select: text;}
+        /* Extra List */
+        .extra-list { display: none; }
+        .extra-list.open { display: block; animation: slideDown 0.3s ease; }
 
         /* Timer Modal */
-        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; backdrop-filter: blur(5px); }
-        .modal { position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); width: 85%; text-align: center; }
-        .timer-big { font-size: 4rem; font-weight: 900; font-variant-numeric: tabular-nums; margin: 20px 0; }
-        .grid-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index: 2000; backdrop-filter: blur(10px); align-items: center; justify-content: center; flex-direction: column; }
+        .timer-display { font-size: 5rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 40px; }
+        .modal.active { display: flex; }
 
+        /* Konfetti Canvas */
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
     </style>
 </head>
 <body>
 
-    <!-- TOPP (HUD) -->
+    <canvas id="confetti"></canvas>
+
+    <!-- HEADER -->
     <div class="fixed-header">
-        <div class="top-row">
-            <div class="clock" id="clock">07:00</div>
-            <button class="timer-btn" onclick="openTimer()">⚡ FOKUS</button>
+        <div class="header-left">
+            <h1 id="clock">07:00</h1>
+            <p>Khalifa OS</p>
         </div>
-
-        <!-- MÄTARE: DAGEN -->
-        <div class="meter-group">
-            <div class="meter-label">
-                <span>Dagens 17h (07-00)</span>
-                <span id="day-percent">0%</span>
+        
+        <div class="rings-container">
+            <!-- Ring 1: Dagen (Tid) -->
+            <div class="ring-wrapper">
+                <svg class="ring-svg" viewBox="0 0 60 60">
+                    <circle class="ring-bg" cx="30" cy="30" r="24"></circle>
+                    <circle id="ring-day" class="ring-progress" cx="30" cy="30" r="24" stroke="#ff3b30"></circle>
+                </svg>
+                <div class="ring-icon">🌅</div>
+                <div class="ring-label">17h</div>
             </div>
-            <div class="meter-track">
-                <div class="meter-fill-time" id="day-bar"></div>
-            </div>
-        </div>
-
-        <!-- MÄTARE: ARBETE -->
-        <div class="meter-group">
-            <div class="meter-label">
-                <span>Energi-Insats</span>
-                <span id="work-percent">0h 0m</span>
-            </div>
-            <div class="meter-track">
-                <div class="meter-fill-work" id="work-bar"></div>
+            
+            <!-- Ring 2: Insats (Jobb) -->
+            <div class="ring-wrapper" onclick="openTimer()">
+                <svg class="ring-svg" viewBox="0 0 60 60">
+                    <circle class="ring-bg" cx="30" cy="30" r="24"></circle>
+                    <circle id="ring-work" class="ring-progress" cx="30" cy="30" r="24" stroke="#007aff"></circle>
+                </svg>
+                <div class="ring-icon">⚡</div>
+                <div class="ring-label">Mål</div>
             </div>
         </div>
     </div>
 
     <!-- JOKER -->
     <div class="joker-box">
-        <div class="joker-label">✨ DAGENS EXTRA-MISSION (Prio 4-6)</div>
-        <div class="joker-title" id="joker-display">Laddar...</div>
-        <div style="display: flex; gap:10px; justify-content: center;">
-            <button class="btn-outline" onclick="rollJoker()">🎲 Byt</button>
-            <button class="btn-outline" onclick="toggleExtra()">📂 Alla</button>
+        <span class="joker-badge">Dagens Fokus (Prio 4-6)</span>
+        <div class="joker-title" id="joker-text">Laddar...</div>
+        <div class="joker-btns">
+            <button class="btn btn-outline" onclick="rollJoker(); vibrate(20);">🎲 Byt</button>
+            <button class="btn btn-outline" onclick="toggleExtra(); vibrate(20);">📂 Alla</button>
         </div>
-        <div class="extra-list" id="extra-list"></div>
+        <div id="extra-list" class="extra-list"></div>
     </div>
 
-    <!-- ZON 1 -->
-    <div class="zone-header z1" onclick="toggleZone('z1-list', this)">
-        <span>🔴 PRIO 1: TUNG (Max 6h)</span>
-        <span class="arrow">▼</span>
+    <!-- LISTOR -->
+    <div id="main-content">
+        <!-- Renderas med JS -->
     </div>
-    <div id="z1-list" class="project-list"></div>
 
-    <!-- ZON 2 -->
-    <div class="zone-header z2" onclick="toggleZone('z2-list', this)">
-        <span>🟠 PRIO 2: BALANS (Max 4h)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div id="z2-list" class="project-list"></div>
-
-    <!-- ZON 3 -->
-    <div class="zone-header z3" onclick="toggleZone('z3-list', this)">
-        <span>🔵 PRIO 3: GRUND (Max 4h)</span>
-        <span class="arrow">▼</span>
-    </div>
-    <div id="z3-list" class="project-list"></div>
-
-
-    <!-- BACKUP SÄKERHET -->
-    <div class="backup-section">
-        <button class="btn-outline" onclick="exportData()">💾 SPARA BACKUP</button>
-        <div id="backup-output" class="backup-text"></div>
-        <div style="margin-top:10px;">
-            <button class="btn-outline" style="border-color:#333; color:#444;" onclick="hardReset()">⚠ ÅTERSTÄLL APP</button>
-        </div>
+    <!-- FOOTER -->
+    <div style="text-align: center; margin-top: 50px; opacity: 0.5;">
+        <button class="btn btn-outline" onclick="exportData()" style="font-size: 0.7rem;">💾 Spara Backup</button>
+        <p style="font-size: 0.7rem; margin-top:10px;">V5.0 - Ultimate</p>
     </div>
 
     <!-- TIMER MODAL -->
-    <div class="modal-overlay" id="timer-overlay">
-        <div class="modal">
-            <div style="color:#888; letter-spacing: 2px;">FOKUS LÄGE</div>
-            <div id="timer-display" class="timer-big">00:00</div>
-            
-            <div id="timer-controls" class="grid-btns">
-                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(15)">15m</button>
-                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(30)">30m</button>
-                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(45)">45m</button>
-                <button class="btn-outline" style="border-color:#fff; color:#fff;" onclick="startTimer(60)">60m</button>
-            </div>
-            <button class="btn-outline" style="width:100%; margin-top:15px; border-color:#f44336; color:#f44336;" onclick="closeTimer()">AVBRYT</button>
+    <div id="timer-modal" class="modal">
+        <div style="color:#666; letter-spacing: 2px; margin-bottom: 20px;">FOKUS LÄGE</div>
+        <div id="timer-val" class="timer-display">00:00</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%; max-width: 300px;">
+            <button class="action-btn" onclick="startTimer(15)">15m</button>
+            <button class="action-btn" onclick="startTimer(30)">30m</button>
+            <button class="action-btn" onclick="startTimer(45)">45m</button>
+            <button class="action-btn" onclick="startTimer(60)">60m</button>
         </div>
+        <button class="btn btn-outline" style="margin-top: 30px; border-color: #ff3b30; color: #ff3b30;" onclick="closeTimer()">Avbryt</button>
     </div>
 
 <script>
     // --- INSTÄLLNINGAR ---
-    const WAKE_TIME = 7; 
-    const SLEEP_TIME = 24; 
+    const WAKE_TIME = 7;
+    const SLEEP_TIME = 24;
+    const WORK_GOAL_MINS = 840; // 14 timmar
 
-    // --- PROJEKT (NU MED EMOJIS) ---
+    // --- PROJEKT DATA ---
     const projects = [
-        // PRIO 1 (Target: minuter för att nå GULD)
-        { id: 'yt_long', title: '📹 YouTube Lång', meta: 'Batch-inspelning / Planering', prio: 1, target: 120 },
-        { id: 'yt_short', title: '📱 YouTube Kort', meta: 'Shorts / Reels / Klipp', prio: 1, target: 60 },
-        
-        // PRIO 2
-        { id: 'social', title: '💬 Social Media', meta: 'Community & Text', prio: 2, target: 45 },
-        { id: 'fam_act', title: '🎲 Familj & Lek', meta: 'Aktivitet / Utflykt', prio: 2, target: 60 },
-        { id: 'azzah', title: '❤️ Azzah Tid', meta: 'Relation & Stöd', prio: 2, target: 60 },
-        { id: 'kids', title: '👶 Barn 1-mot-1', meta: 'Fokus tid', prio: 2, target: 30 },
-        { id: 'health', title: '🌿 Hälsa', meta: 'Promenad / Vila', prio: 2, target: 45 },
-
-        // PRIO 3
-        { id: 'prayer', title: '🕌 Bön & Adhkar', meta: 'Andlighet', prio: 3, target: 30 },
-        { id: 'meals', title: '🍲 Mat & Hus', meta: 'Gemenskap & Drift', prio: 3, target: 45 },
-        { id: 'autobio', title: '📖 Självbiografi', meta: 'Skriv lite', prio: 3, target: 15 },
-        { id: 'learning', title: '🧠 Lärande', meta: 'Lyssna / Läsa', prio: 3, target: 30 },
-
-        // PRIO 4-6
-        { id: 'thriller', title: '🕵️‍♂️ Bok: Deckare', meta: 'Veckovis', prio: 4, target: 30 },
-        { id: 'biz', title: '👕 Business/Merch', meta: 'Veckovis', prio: 4, target: 30 },
-        { id: 'prep', title: '🥦 Meal Prep', meta: 'Veckovis', prio: 4, target: 60 },
-        { id: 'coach', title: '🎓 Coaching', meta: 'Varannan', prio: 5, target: 30 },
-        { id: 'strategy', title: '♟️ Strategi', meta: 'Månadsvis', prio: 6, target: 30 },
-        { id: 'ai', title: '🤖 AI & Tech', meta: 'Månadsvis', prio: 6, target: 30 }
+        { id: 'yt_long', title: 'YouTube Lång', meta: 'Batch-inspelning / Planering', prio: 1, target: 120 },
+        { id: 'yt_short', title: 'YouTube Kort', meta: 'Shorts / Reels / Klipp', prio: 1, target: 60 },
+        { id: 'social', title: 'Social Media', meta: 'Community / Svar', prio: 2, target: 45 },
+        { id: 'fam_act', title: 'Familj & Lek', meta: 'Aktivitet / Utflykt', prio: 2, target: 60 },
+        { id: 'azzah', title: 'Azzah Tid', meta: 'Relation / Stöd', prio: 2, target: 60 },
+        { id: 'kids', title: 'Barn 1-mot-1', meta: 'Fokus tid', prio: 2, target: 30 },
+        { id: 'health', title: 'Hälsa', meta: 'Promenad / Vila', prio: 2, target: 45 },
+        { id: 'prayer', title: 'Bön & Adhkar', meta: 'Andlighet', prio: 3, target: 30 },
+        { id: 'meals', title: 'Mat & Hus', meta: 'Drift / Matlagning', prio: 3, target: 45 },
+        { id: 'autobio', title: 'Självbiografi', meta: 'Skrivande', prio: 3, target: 15 },
+        { id: 'learning', title: 'Lärande', meta: 'Lyssna / Läsa', prio: 3, target: 30 },
+        // Prio 4-6
+        { id: 'thriller', title: 'Bok: Deckare', meta: 'Veckovis', prio: 4, target: 30 },
+        { id: 'biz', title: 'Business/Merch', meta: 'Veckovis', prio: 4, target: 30 },
+        { id: 'prep', title: 'Meal Prep', meta: 'Veckovis', prio: 4, target: 60 },
+        { id: 'coach', title: 'Coaching', meta: 'Varannan', prio: 5, target: 30 },
+        { id: 'strategy', title: 'Strategi', meta: 'Månadsvis', prio: 6, target: 30 },
+        { id: 'ai', title: 'AI & Tech', meta: 'Månadsvis', prio: 6, target: 30 }
     ];
 
-    // --- LOGIK ---
-    let progress = JSON.parse(localStorage.getItem('anasDatav5')) || {};
+    // --- SYSTEM LOGIK ---
+    let progress = JSON.parse(localStorage.getItem('khalifa_v5')) || {};
     
-    // Auto-Reset vid ny dag
-    const lastDate = localStorage.getItem('anasDatev5');
-    const todayStr = new Date().toDateString();
-    if(lastDate !== todayStr) {
-        progress = {}; 
-        localStorage.setItem('anasDatev5', todayStr);
-        localStorage.setItem('anasDatav5', JSON.stringify(progress));
+    // Auto Reset
+    const today = new Date().toDateString();
+    if(localStorage.getItem('khalifa_date') !== today) {
+        progress = {};
+        localStorage.setItem('khalifa_date', today);
+        localStorage.setItem('khalifa_v5', JSON.stringify(progress));
     }
 
     function render() {
-        // Töm listor
-        document.getElementById('z1-list').innerHTML = '';
-        document.getElementById('z2-list').innerHTML = '';
-        document.getElementById('z3-list').innerHTML = '';
-        document.getElementById('extra-list').innerHTML = '';
+        const zones = {
+            1: { color: 'var(--p1)', title: '🔴 PRIO 1: TUNG', html: '' },
+            2: { color: 'var(--p2)', title: '🟠 PRIO 2: BALANS', html: '' },
+            3: { color: 'var(--p3)', title: '🔵 PRIO 3: GRUND', html: '' },
+            4: { color: 'var(--p46)', title: 'EXTRA', html: '' }
+        };
 
+        const extraHtml = [];
         let totalMins = 0;
 
         projects.forEach(p => {
-            const mins = progress[p.id] || 0;
-            totalMins += mins;
-            const isGold = mins >= p.target; // Har vi nått målet?
+            const cur = progress[p.id] || 0;
+            totalMins += cur;
+            const isGold = cur >= p.target;
             
-            const html = `
-                <div class="task-row ${isGold ? 'gold-status' : ''}">
-                    <div class="task-info">
-                        <span class="task-name">${p.title} ${mins > 0 ? `(${formatTime(mins)})` : ''}</span>
-                        <span class="task-meta">${p.meta} ${isGold ? '⭐ KLAR' : ''}</span>
+            const card = `
+                <div class="task-card ${isGold ? 'gold' : ''}">
+                    <div class="task-header">
+                        <div>
+                            <span class="task-title">${p.title}</span>
+                            <span class="task-meta">${p.meta} ${isGold ? '⭐ KLAR' : ''}</span>
+                        </div>
+                        <span class="task-current">${formatTime(cur)}</span>
                     </div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-add" onclick="addTime('${p.id}', 15)">15</button>
-                        <button class="btn-add" onclick="addTime('${p.id}', 30)">30</button>
+                    <div class="action-bar">
+                        <button class="action-btn" onclick="addTime('${p.id}', 15)">+15 min</button>
+                        <button class="action-btn" onclick="addTime('${p.id}', 30)">+30 min</button>
                     </div>
                 </div>
             `;
 
-            if(p.prio === 1) document.getElementById('z1-list').innerHTML += html;
-            else if(p.prio === 2) document.getElementById('z2-list').innerHTML += html;
-            else if(p.prio === 3) document.getElementById('z3-list').innerHTML += html;
-            else document.getElementById('extra-list').innerHTML += html;
+            if(p.prio <= 3) zones[p.prio].html += card;
+            else extraHtml.push(card);
         });
 
-        // Uppdatera mätare
-        updateMeters(totalMins);
+        // Bygg Main Content
+        const main = document.getElementById('main-content');
+        main.innerHTML = '';
+        
+        [1, 2, 3].forEach(z => {
+            main.innerHTML += `
+                <div class="zone-title">
+                    <span><span class="zone-badge" style="background:${zones[z].color}"></span>${zones[z].title}</span>
+                </div>
+                ${zones[z].html}
+            `;
+        });
+        
+        document.getElementById('extra-list').innerHTML = extraHtml.join('');
+        updateRings(totalMins);
     }
 
-    function addTime(id, amount) {
+    function addTime(id, min) {
+        vibrate(15); // Haptisk
         if(!progress[id]) progress[id] = 0;
-        progress[id] += amount;
-        localStorage.setItem('anasDatav5', JSON.stringify(progress));
+        
+        const oldVal = progress[id];
+        progress[id] += min;
+        
+        // Check Gold Trigger
+        const p = projects.find(x => x.id === id);
+        if(oldVal < p.target && progress[id] >= p.target) {
+            triggerConfetti();
+            vibrate([50, 50, 50]); // Success vibration
+        }
+        
+        localStorage.setItem('khalifa_v5', JSON.stringify(progress));
         render();
     }
 
-    function updateMeters(totalWorkMins) {
-        // Tid Mätare
+    // --- RINGS LOGIK (SVG MATH) ---
+    function updateRings(totalMins) {
+        // Dag Ring
         const now = new Date();
-        const currentHour = now.getHours() + (now.getMinutes()/60);
-        const dayDuration = SLEEP_TIME - WAKE_TIME;
-        let dayPct = 0;
+        const hour = now.getHours() + now.getMinutes()/60;
+        const dayPct = Math.max(0, Math.min(1, (hour - WAKE_TIME) / (SLEEP_TIME - WAKE_TIME)));
+        setRing('ring-day', dayPct);
+
+        // Work Ring
+        const workPct = Math.min(1, totalMins / WORK_GOAL_MINS);
+        setRing('ring-work', workPct);
+    }
+
+    function setRing(id, pct) {
+        const circle = document.getElementById(id);
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        const offset = circumference - (pct * circumference);
+        circle.style.strokeDashoffset = offset;
         
-        if(currentHour >= WAKE_TIME) {
-            dayPct = ((currentHour - WAKE_TIME) / dayDuration) * 100;
-        }
-        document.getElementById('day-bar').style.width = Math.min(dayPct, 100) + "%";
-        document.getElementById('day-percent').innerText = Math.round(Math.min(dayPct, 100)) + "%";
-
-        // Work Mätare (Mål 14h = 840 min)
-        const workPct = (totalWorkMins / 840) * 100;
-        document.getElementById('work-bar').style.width = Math.min(workPct, 100) + "%";
-        document.getElementById('work-percent').innerText = formatTime(totalWorkMins);
+        // Färgändring vid 100%
+        if(pct >= 1) circle.style.stroke = "var(--gold)";
     }
 
-    // --- GUI FUNKTIONER ---
-    function formatTime(m) {
-        if(m >= 60) return (m/60).toFixed(1) + 'h';
-        return m + 'm';
-    }
-
-    function toggleZone(id, header) {
-        const list = document.getElementById(id);
-        if(list.classList.contains('closed')) {
-            list.classList.remove('closed');
-            header.classList.remove('closed');
-        } else {
-            list.classList.add('closed');
-            header.classList.add('closed');
-        }
-    }
-
+    // --- JOKER ---
     function rollJoker() {
         const extras = projects.filter(p => p.prio >= 4);
-        const random = extras[Math.floor(Math.random() * extras.length)];
-        document.getElementById('joker-display').innerText = random.title;
+        const rand = extras[Math.floor(Math.random() * extras.length)];
+        document.getElementById('joker-text').innerText = rand.title;
+    }
+    function toggleExtra() { 
+        document.getElementById('extra-list').classList.toggle('open'); 
     }
 
-    function toggleExtra() {
-        const list = document.getElementById('extra-list');
-        list.classList.toggle('show');
+    // --- UTILS ---
+    function vibrate(pattern) {
+        if(navigator.vibrate) navigator.vibrate(pattern);
+    }
+    
+    function formatTime(m) {
+        return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm';
     }
 
-    // --- EXPORT / IMPORT ---
-    function exportData() {
-        const data = JSON.stringify(progress);
-        const el = document.getElementById('backup-output');
-        el.style.display = 'block';
-        el.innerText = data;
-        alert("Kopiera texten som dök upp längst ner och spara i dina Anteckningar!");
-    }
-
-    function hardReset() {
-        if(confirm("Vill du radera allt?")) {
-            localStorage.clear();
-            location.reload();
-        }
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText = 
+            String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        // Uppdatera ringar även om inget klickas
+        updateRings(Object.values(progress).reduce((a,b)=>a+b,0)); 
     }
 
     // --- TIMER ---
     let timerInt;
-    function openTimer() { document.getElementById('timer-overlay').style.display = 'block'; }
-    function closeTimer() { document.getElementById('timer-overlay').style.display = 'none'; clearInterval(timerInt); }
-    
-    function startTimer(mins) {
-        let sec = mins * 60;
-        const display = document.getElementById('timer-display');
-        document.getElementById('timer-controls').style.display = 'none'; // Göm knappar
-        
+    function openTimer() { document.getElementById('timer-modal').classList.add('active'); }
+    function closeTimer() { document.getElementById('timer-modal').classList.remove('active'); clearInterval(timerInt); }
+    function startTimer(min) {
+        vibrate(20);
+        let sec = min * 60;
+        const disp = document.getElementById('timer-val');
         if(timerInt) clearInterval(timerInt);
         timerInt = setInterval(() => {
             sec--;
             let m = Math.floor(sec / 60);
             let s = sec % 60;
-            display.innerText = `${m}:${String(s).padStart(2,'0')}`;
-            
+            disp.innerText = `${m}:${String(s).padStart(2,'0')}`;
             if(sec <= 0) {
                 clearInterval(timerInt);
-                display.innerText = "DONE!";
-                display.style.color = "var(--gold)";
-                // Vibration/Ljud här om möjligt
+                disp.innerText = "KLART!";
+                disp.style.color = "var(--gold)";
+                vibrate([200, 100, 200]);
             }
         }, 1000);
     }
 
-    // START
-    setInterval(() => {
-        const d = new Date();
-        document.getElementById('clock').innerText = d.toTimeString().substr(0, 5);
-        updateMeters(Object.values(progress).reduce((a,b)=>a+b,0));
-    }, 1000);
-    
+    // --- KONFETTI (Mini-script) ---
+    function triggerConfetti() {
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let particles = [];
+        const colors = ['#ff3b30', '#ff9500', '#ffd60a', '#007aff', '#af52de'];
+        
+        for(let i=0; i<100; i++) {
+            particles.push({
+                x: canvas.width/2, y: canvas.height/2,
+                vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10 - 5,
+                color: colors[Math.floor(Math.random()*colors.length)],
+                size: Math.random()*5 + 2, life: 100
+            });
+        }
+        
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach((p, index) => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                if(p.life <= 0) particles.splice(index, 1);
+            });
+            if(particles.length > 0) requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    // --- EXPORT ---
+    function exportData() {
+        alert("Backup-kod (Kopiera): " + JSON.stringify(progress));
+    }
+
+    // INIT
+    setInterval(updateClock, 30000);
+    updateClock();
     rollJoker();
     render();
 
