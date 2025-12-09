@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050505">
-    <title>Khalifa Commander V14</title>
+    <title>Khalifa Commander V14 (Fix)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -88,7 +88,7 @@
         .sum-label { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: 700; }
         .sum-sep { width: 1px; background: #222; height: 30px; margin: auto; }
 
-        /* --- BUDGET OVERVIEW (NY I V14) --- */
+        /* --- BUDGET OVERVIEW --- */
         .budget-overview { margin: 0 20px 20px 20px; padding: 15px; background: #0a0a0a; border-radius: 12px; border: 1px solid #222; }
         .budget-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .budget-label { width: 100px; font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; }
@@ -317,7 +317,7 @@
             </div>
         </div>
 
-        <!-- BUDGET OVERVIEW (NY I V14) -->
+        <!-- BUDGET OVERVIEW -->
         <div class="budget-overview">
             <div class="budget-row">
                 <span class="budget-label">PRIO 1 (TUNG)</span>
@@ -593,11 +593,20 @@
 
     function getLastDoneText(id, prio) {
         const last = lastDone[id];
-        if (!last) return "❓ Aldrig";
-        const days = Math.floor((Date.now() - new Date(last)) / (86400000));
-        if (days === 0) return "✅ Idag";
-        if (days === 1) return "📅 Igår";
-        return `📅 ${days}d sedan`;
+        if (!last) return "❓ Aldrig gjord";
+        
+        const daysSince = Math.floor((Date.now() - new Date(last)) / (1000*60*60*24));
+        
+        if (daysSince === 0) return "✅ Idag";
+        if (daysSince === 1) return "📅 Igår";
+        if (daysSince < 7) return `📅 ${daysSince}d sedan`;
+        
+        // VARNINGAR för försenade projekt
+        if (prio === 4 && daysSince > 7) return `⚠️ ${daysSince}d sedan`;
+        if (prio === 5 && daysSince > 14) return `🚨 ${daysSince}d sedan`;
+        if (prio === 6 && daysSince > 30) return `🚨 ${daysSince}d sedan`;
+        
+        return `📅 ${daysSince}d sedan`;
     }
 
     function renderList() {
