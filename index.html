@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050505">
-    <title>Khalifa Commander V13</title>
+    <title>Khalifa Commander V14</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -20,6 +20,7 @@
             --p2-grad: linear-gradient(135deg, #ff8800, #ffbb00);
             --p3-grad: linear-gradient(135deg, #007aff, #00d4ff);
             --p46-grad: linear-gradient(135deg, #7b1fa2, #e040fb);
+            --p0-grad: linear-gradient(135deg, #444, #666);
             
             --gold: #ffd700;
             --nav-height: 80px;
@@ -80,12 +81,20 @@
         /* --- DASHBOARD SUMMARY CARD --- */
         .summary-card {
             background: linear-gradient(180deg, #181818, #0a0a0a);
-            margin: 20px 20px 30px 20px; padding: 15px; border-radius: 16px; border: 1px solid #2a2a2a;
+            margin: 20px 20px 20px 20px; padding: 15px; border-radius: 16px; border: 1px solid #2a2a2a;
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center;
         }
         .sum-val { font-size: 1.2rem; font-weight: 800; display: block; color: #fff; }
         .sum-label { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: 700; }
         .sum-sep { width: 1px; background: #222; height: 30px; margin: auto; }
+
+        /* --- BUDGET OVERVIEW (NY I V14) --- */
+        .budget-overview { margin: 0 20px 20px 20px; padding: 15px; background: #0a0a0a; border-radius: 12px; border: 1px solid #222; }
+        .budget-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .budget-label { width: 100px; font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; }
+        .budget-bar-bg { flex-grow: 1; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
+        .budget-bar-fill { height: 100%; transition: width 0.5s; }
+        .budget-text { font-family: monospace; font-size: 0.7rem; color: #aaa; width: 55px; text-align: right; }
 
         /* --- TASK CARDS --- */
         .zone-header {
@@ -102,11 +111,13 @@
             position: relative; overflow: hidden; transition: transform 0.1s;
         }
         .task-card:active { transform: scale(0.98); }
+        .task-card.disabled { opacity: 0.3; pointer-events: none; }
 
         /* THE CHARGING ANIMATION */
         .task-card.pressing { transform: scale(0.95); transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
         /* GRADIENT BORDERS */
+        .prio-0 { border-left: 4px solid #aaa; }
         .prio-1 { border-left: 4px solid #ff2c2c; }
         .prio-2 { border-left: 4px solid #ff8800; }
         .prio-3 { border-left: 4px solid #007aff; }
@@ -122,10 +133,11 @@
         /* CARD CONTENT */
         .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .task-title { font-size: 1rem; font-weight: 700; display: block; margin-bottom: 3px; }
-        .task-meta { font-size: 0.75rem; color: #666; display: flex; gap: 8px; }
+        .task-meta { font-size: 0.75rem; color: #666; display: flex; flex-direction: column; gap: 2px; }
+        .task-meta-row { display:flex; gap: 10px; align-items: center; }
         
         /* CONTROLS */
-        .control-group { display: flex; align-items: center; gap: 10px; }
+        .control-group { display: flex; align-items: center; gap: 8px; }
         
         .badge-container { display: flex; flex-direction: column; align-items: flex-end; }
         .timer-badge { 
@@ -149,7 +161,6 @@
             display: none; align-items: center; justify-content: center;
         }
         
-        /* NEW: ADD TIME BUTTON */
         .btn-add {
             width: 32px; height: 32px; border-radius: 50%;
             background: #333; color: #aaa; border: none;
@@ -159,7 +170,13 @@
         }
         .btn-add:active { transform: scale(0.9); background: #444; }
 
+        .btn-fullday { 
+            width: 100%; padding: 8px; margin-top: 12px; background: #222; 
+            border: 1px solid #444; color: #888; border-radius: 8px; font-size: 0.75rem; 
+        }
+
         /* DYNAMIC COLORS */
+        .prio-0 .recording .btn-main { background: var(--p0-grad); }
         .prio-1 .recording .btn-main { background: var(--p1-grad); }
         .prio-2 .recording .btn-main { background: var(--p2-grad); }
         .prio-3 .recording .btn-main { background: var(--p3-grad); }
@@ -171,13 +188,16 @@
 
         /* Progress Bar */
         .card-progress-bg { height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 10px; }
-        .card-progress-fill { height: 100%; background: #444; width: 0%; transition: width 0.5s; }
+        .card-progress-fill { height: 100%; background: #444; width: 0%; transition: width 0.5s; max-width: 200%; }
         
+        .prio-0 .card-progress-fill { background: var(--p0-grad); }
         .prio-1 .card-progress-fill { background: var(--p1-grad); }
         .prio-2 .card-progress-fill { background: var(--p2-grad); }
         .prio-3 .card-progress-fill { background: var(--p3-grad); }
         .prio-low .card-progress-fill { background: var(--p46-grad); }
-        .done .card-progress-fill { background: var(--gold) !important; }
+        
+        /* Over 100% */
+        .over-target .card-progress-fill { background: var(--gold) !important; }
 
         /* --- STATS VIEW --- */
         .view-section { display: none; padding: 0 20px 20px 20px; }
@@ -244,7 +264,7 @@
         <div class="top-deck">
             <div class="clock-area">
                 <h1 id="clock">07:00</h1>
-                <p>COMMANDER V13</p>
+                <p>COMMANDER V14</p>
             </div>
             
             <div class="header-right">
@@ -294,6 +314,39 @@
             <div>
                 <span class="sum-val" id="sum-eff">0%</span>
                 <span class="sum-label">Av Dagens Mål</span>
+            </div>
+        </div>
+
+        <!-- BUDGET OVERVIEW (NY I V14) -->
+        <div class="budget-overview">
+            <div class="budget-row">
+                <span class="budget-label">PRIO 1 (TUNG)</span>
+                <div class="budget-bar-bg">
+                    <div class="budget-bar-fill" id="budget-p1" style="background:var(--p1-grad)"></div>
+                </div>
+                <span class="budget-text" id="budget-p1-text">0h/6h</span>
+            </div>
+            <div class="budget-row">
+                <span class="budget-label">PRIO 2 (BALANS)</span>
+                <div class="budget-bar-bg">
+                    <div class="budget-bar-fill" id="budget-p2" style="background:var(--p2-grad)"></div>
+                </div>
+                <span class="budget-text" id="budget-p2-text">0h/4h</span>
+            </div>
+            <div class="budget-row">
+                <span class="budget-label">PRIO 3 (GRUND)</span>
+                <div class="budget-bar-bg">
+                    <div class="budget-bar-fill" id="budget-p3" style="background:var(--p3-grad)"></div>
+                </div>
+                <span class="budget-text" id="budget-p3-text">0h/4h</span>
+            </div>
+            <div style="height:10px;"></div>
+            <div class="budget-row">
+                <span class="budget-label">PRIO 0 (VECKA)</span>
+                <div class="budget-bar-bg">
+                    <div class="budget-bar-fill" id="budget-p0" style="background:#666"></div>
+                </div>
+                <span class="budget-text" id="budget-p0-text">0h/14h</span>
             </div>
         </div>
 
@@ -375,40 +428,67 @@
     </div>
 
 <script>
-    // --- KONFIGURATION ---
+    // --- KONFIGURATION (27 PROJEKT) ---
     const projects = [
-        { id: 'yt_long', title: 'YouTube Lång', icon: '📹', prio: 1, target: 120 },
-        { id: 'yt_short', title: 'YouTube Kort', icon: '📱', prio: 1, target: 60 },
-        { id: 'social', title: 'Social Media', icon: '💬', prio: 2, target: 45 },
-        { id: 'fam_act', title: 'Familj & Lek', icon: '🎲', prio: 2, target: 60 },
-        { id: 'azzah', title: 'Azzah Tid', icon: '❤️', prio: 2, target: 60 },
-        { id: 'kids', title: 'Barn 1-mot-1', icon: '👶', prio: 2, target: 30 },
-        { id: 'health', title: 'Hälsa', icon: '🌿', prio: 2, target: 45 },
-        { id: 'prayer', title: 'Bön & Adhkar', icon: '📿', prio: 3, target: 30 },
-        { id: 'meals', title: 'Mat & Hus', icon: '🏠', prio: 3, target: 45 },
-        { id: 'learning', title: 'Lärande', icon: '🧠', prio: 3, target: 30 },
-        { id: 'thriller', title: 'Bok: Deckare', icon: '🕵️‍♂️', prio: 4, target: 30 },
-        { id: 'biz', title: 'Business', icon: '💼', prio: 4, target: 30 },
-        { id: 'prep', title: 'Meal Prep', icon: '🥦', prio: 4, target: 60 },
-        { id: 'coach', title: 'Coaching', icon: '🎓', prio: 5, target: 30 },
-        { id: 'strategy', title: 'Strategi', icon: '♟️', prio: 6, target: 30 },
-        { id: 'ai', title: 'AI & Tech', icon: '🤖', prio: 6, target: 30 }
+        // PRIO 0 (Vecka)
+        { id: 'video_edit', title: 'Videoredigering', icon: '🎬', prio: 0, target: 840, period: 'week' },
+        
+        // PRIO 1 (Dag)
+        { id: 'yt_long', title: 'YouTube Lång', icon: '📹', prio: 1, target: 120, period: 'day' },
+        { id: 'yt_short', title: 'YouTube Kort', icon: '📱', prio: 1, target: 60, period: 'day' },
+        
+        // PRIO 2 (Dag)
+        { id: 'social', title: 'Social Media', icon: '💬', prio: 2, target: 45, period: 'day' },
+        { id: 'fam_act', title: 'Familj & Lek', icon: '🎲', prio: 2, target: 60, period: 'day' },
+        { id: 'azzah', title: 'Azzah Tid', icon: '❤️', prio: 2, target: 60, period: 'day' },
+        { id: 'kids', title: 'Barn 1-mot-1', icon: '👶', prio: 2, target: 30, period: 'day' },
+        { id: 'health', title: 'Hälsa', icon: '🌿', prio: 2, target: 45, period: 'day' },
+        
+        // PRIO 3 (Dag)
+        { id: 'prayer', title: 'Bön & Adhkar', icon: '📿', prio: 3, target: 30, period: 'day' },
+        { id: 'meals', title: 'Mat & Hus', icon: '🏠', prio: 3, target: 45, period: 'day' },
+        { id: 'autobio', title: 'Självbiografi', icon: '📚', prio: 3, target: 15, period: 'day' },
+        { id: 'learning', title: 'Lärande', icon: '🧠', prio: 3, target: 30, period: 'day' },
+        
+        // PRIO 4 (Vecka)
+        { id: 'thriller', title: 'Bok: Deckare', icon: '🕵️‍♂️', prio: 4, target: 30, period: 'week' },
+        { id: 'biz', title: 'Business/Merch', icon: '💼', prio: 4, target: 30, period: 'week' },
+        { id: 'prep', title: 'Meal Prep', icon: '🥦', prio: 4, target: 60, period: 'week' },
+        { id: 'podcast', title: 'Podcast', icon: '🎙️', prio: 4, target: 30, period: 'week' },
+        { id: 'groups', title: 'Online Grupper', icon: '👥', prio: 4, target: 30, period: 'week' },
+        
+        // PRIO 5 (Biweek)
+        { id: 'coach_setup', title: 'Coaching Setup', icon: '🎓', prio: 5, target: 30, period: 'biweek' },
+        { id: 'fam_coach', title: 'Familj & Faderscoach', icon: '👨‍👩‍👧', prio: 5, target: 30, period: 'biweek' },
+        
+        // PRIO 6 (Month)
+        { id: 'adhd_book', title: 'ADHD Bok', icon: '📖', prio: 6, target: 30, period: 'month' },
+        { id: 'blog', title: 'Blogg/Artiklar', icon: '📝', prio: 6, target: 30, period: 'month' },
+        { id: 'basketball', title: 'Basketball', icon: '🏀', prio: 6, target: 30, period: 'month' },
+        { id: 'workshop', title: 'Workshopdesign', icon: '🎨', prio: 6, target: 30, period: 'month' },
+        { id: 'ai_tech', title: 'AI & Tech', icon: '🤖', prio: 6, target: 30, period: 'month' },
+        { id: 'strategy', title: 'Strategi', icon: '♟️', prio: 6, target: 30, period: 'month' },
+        { id: 'networking', title: 'Socialt/Nätverkande', icon: '🌐', prio: 6, target: 30, period: 'month' }
     ];
 
     const WAKE_TIME = 7; 
     const SLEEP_TIME = 24;
 
     // --- STATE MANAGER ---
-    let history = JSON.parse(localStorage.getItem('khalifa_v13_hist')) || {};
-    let sessions = JSON.parse(localStorage.getItem('khalifa_v13_sessions')) || {};
-    let workGoal = parseInt(localStorage.getItem('khalifa_v13_goal')) || 840; 
-    let undoStack = JSON.parse(localStorage.getItem('khalifa_v13_undo')) || [];
-    const MAX_UNDO = 10;
+    let history = JSON.parse(localStorage.getItem('khalifa_v14_hist')) || {};
+    let sessions = JSON.parse(localStorage.getItem('khalifa_v14_sessions')) || {};
+    let workGoal = parseInt(localStorage.getItem('khalifa_v14_goal')) || 840; 
+    let undoStack = JSON.parse(localStorage.getItem('khalifa_v14_undo')) || [];
+    let lastDone = JSON.parse(localStorage.getItem('khalifa_v14_lastDone')) || {};
+    let periodProgress = JSON.parse(localStorage.getItem('khalifa_v14_periodProgress')) || {};
     
+    const MAX_UNDO = 10;
     let filterMode = 'today';
     let cachedStreaks = {}; 
+    let isFullDayMode = false;
+    let fullDayProjectId = null;
 
-    // --- CORE ---
+    // --- HELPER FUNCTIONS ---
     function getTodayStr() { return new Date().toISOString().split('T')[0]; }
     function getTodayData() { 
         const d = getTodayStr();
@@ -416,12 +496,63 @@
         return history[d];
     }
     function saveState() {
-        localStorage.setItem('khalifa_v13_hist', JSON.stringify(history));
-        localStorage.setItem('khalifa_v13_sessions', JSON.stringify(sessions));
-        localStorage.setItem('khalifa_v13_goal', workGoal);
-        localStorage.setItem('khalifa_v13_undo', JSON.stringify(undoStack));
+        localStorage.setItem('khalifa_v14_hist', JSON.stringify(history));
+        localStorage.setItem('khalifa_v14_sessions', JSON.stringify(sessions));
+        localStorage.setItem('khalifa_v14_goal', workGoal);
+        localStorage.setItem('khalifa_v14_undo', JSON.stringify(undoStack));
+        localStorage.setItem('khalifa_v14_lastDone', JSON.stringify(lastDone));
+        localStorage.setItem('khalifa_v14_periodProgress', JSON.stringify(periodProgress));
     }
     function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
+
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+    }
+
+    // --- RESET LOGIC ---
+    function checkPeriodResets() {
+        const today = new Date();
+        const dateStr = today.toDateString();
+        const lastCheck = localStorage.getItem('khalifa_v14_resetCheck');
+        
+        if (lastCheck === dateStr) return; // Redan kollat idag
+
+        const dayOfWeek = today.getDay(); // 1 = Monday
+        const dayOfMonth = today.getDate(); // 1 = 1st
+        const weekNum = getWeekNumber(today);
+
+        let didReset = false;
+
+        // Reset Weekly (Monday)
+        if (dayOfWeek === 1) {
+            projects.filter(p => p.period === 'week').forEach(p => periodProgress[p.id] = 0);
+            // Prio 0 (Video) är också week
+            projects.filter(p => p.prio === 0).forEach(p => periodProgress[p.id] = 0);
+            didReset = true;
+        }
+
+        // Reset Biweekly (Monday even weeks)
+        if (dayOfWeek === 1 && weekNum % 2 === 0) {
+            projects.filter(p => p.period === 'biweek').forEach(p => periodProgress[p.id] = 0);
+            didReset = true;
+        }
+
+        // Reset Monthly (1st)
+        if (dayOfMonth === 1) {
+            projects.filter(p => p.period === 'month').forEach(p => periodProgress[p.id] = 0);
+            didReset = true;
+        }
+
+        if (didReset) {
+            saveState();
+            showToast("🔄 Periodiska mål nollställda", false);
+        }
+        
+        localStorage.setItem('khalifa_v14_resetCheck', dateStr);
+    }
 
     // --- STREAK OPTIMIZATION ---
     function updateStreaks() {
@@ -442,8 +573,31 @@
     function render() {
         if(Object.keys(cachedStreaks).length === 0) updateStreaks();
         renderList();
+        renderBudgets();
         renderSummary();
         updateRings();
+    }
+
+    function shouldShowInTodayFilter(p) {
+        if (p.prio <= 3) return true;
+        const last = lastDone[p.id];
+        const daysSince = last ? Math.floor((Date.now() - new Date(last)) / (86400000)) : 999;
+        const curr = periodProgress[p.id] || 0;
+        const notDone = curr < p.target;
+        
+        if (p.prio === 4) return daysSince > 7 || notDone;
+        if (p.prio === 5) return daysSince > 14 || notDone;
+        if (p.prio === 6) return daysSince > 30 || notDone;
+        return false;
+    }
+
+    function getLastDoneText(id, prio) {
+        const last = lastDone[id];
+        if (!last) return "❓ Aldrig";
+        const days = Math.floor((Date.now() - new Date(last)) / (86400000));
+        if (days === 0) return "✅ Idag";
+        if (days === 1) return "📅 Igår";
+        return `📅 ${days}d sedan`;
     }
 
     function renderList() {
@@ -451,32 +605,43 @@
         list.innerHTML = '';
         const todayData = getTodayData();
 
-        // 1. Gruppera för Headers
-        let zoneStats = { 1:{done:0, target:0}, 2:{done:0, target:0}, 3:{done:0, target:0}, 4:{done:0, target:0} };
+        // Group headers
+        let zoneStats = { 0:{d:0,t:0}, 1:{d:0,t:0}, 2:{d:0,t:0}, 3:{d:0,t:0}, 4:{d:0,t:0} };
         projects.forEach(p => {
             const z = p.prio > 3 ? 4 : p.prio;
-            zoneStats[z].target += p.target;
-            zoneStats[z].done += (todayData[p.id] || 0);
+            zoneStats[z].t += p.target;
+            zoneStats[z].d += (p.period === 'day' ? (todayData[p.id] || 0) : (periodProgress[p.id] || 0));
         });
 
         const sorted = [...projects].sort((a,b) => a.prio - b.prio);
-        let lastPrio = 0;
+        let lastPrio = -1;
 
         sorted.forEach(p => {
-            if(filterMode === 'today' && p.prio > 3) return;
-            if(filterMode === 'todo' && (todayData[p.id] || 0) >= p.target) return;
+            if (filterMode === 'today' && !shouldShowInTodayFilter(p)) return;
+            
+            // Progress Calculation
+            let currentProgress, targetProgress;
+            if (p.period === 'day') {
+                currentProgress = todayData[p.id] || 0;
+            } else {
+                currentProgress = periodProgress[p.id] || 0;
+            }
+            targetProgress = p.target;
+            
+            if (filterMode === 'todo' && currentProgress >= targetProgress) return;
 
-            // RENDER ZONE HEADER
+            // Headers
             if(p.prio !== lastPrio) {
                 let z = p.prio > 3 ? 4 : p.prio;
                 let label = "FRAMTID";
                 let icon = "🚀";
-                if(z===1) { label="TUNG ZON"; icon="🔥"; }
-                if(z===2) { label="BALANS"; icon="⚖️"; }
-                if(z===3) { label="GRUND"; icon="⚓️"; }
+                if(z===0) { label="HELDAG / VECKA"; icon="🔥"; }
+                if(z===1) { label="TUNG ZON"; icon="🔴"; }
+                if(z===2) { label="BALANS"; icon="🟠"; }
+                if(z===3) { label="GRUND"; icon="🔵"; }
 
-                const doneH = formatTimeShort(zoneStats[z].done);
-                const targH = formatTimeShort(zoneStats[z].target);
+                const doneH = formatTimeShort(zoneStats[z].d);
+                const targH = formatTimeShort(zoneStats[z].t);
 
                 list.innerHTML += `
                     <div class="zone-header">
@@ -486,53 +651,60 @@
                 lastPrio = p.prio;
             }
 
-            // CALC DATA
-            const totalMins = todayData[p.id] || 0; // Committed history
-            const session = sessions[p.id]; // Active/Paused session
-            
+            // Session data
+            const session = sessions[p.id];
             const isRunning = session && session.state === 'running';
             const isPaused = session && session.state === 'paused';
             
-            // Calculate pending time (buffer)
             let pendingMins = 0;
             if (session) {
-                if (isRunning) {
-                    const elapsed = Date.now() - session.startTime;
-                    pendingMins = Math.floor((session.accumulated + elapsed) / 60000);
-                } else {
-                    pendingMins = Math.floor(session.accumulated / 60000);
-                }
+                const elapsed = isRunning ? (Date.now() - session.startTime) : 0;
+                pendingMins = Math.floor((session.accumulated + elapsed) / 60000);
             }
 
-            const combinedMins = totalMins + pendingMins;
-            const progressPct = Math.min(100, (combinedMins / p.target) * 100);
-            
-            const isDone = combinedMins >= p.target;
+            const totalDisplayMins = currentProgress + pendingMins;
+            const progressPct = (totalDisplayMins / targetProgress) * 100;
+            const isOverTarget = progressPct > 100;
             const streak = cachedStreaks[p.id] || 0;
 
-            // CLASSES
+            // Classes
             let classes = 'task-card';
-            if(p.prio === 1) classes += ' prio-1';
+            if(p.prio === 0) classes += ' prio-0';
+            else if(p.prio === 1) classes += ' prio-1';
             else if(p.prio === 2) classes += ' prio-2';
             else if(p.prio === 3) classes += ' prio-3';
             else classes += ' prio-low';
 
             if(isRunning) classes += ' recording';
             if(isPaused) classes += ' paused';
-            if(isDone && !isRunning) classes += ' done';
+            if(currentProgress >= targetProgress && !isRunning) classes += ' done';
+            if(isOverTarget) classes += ' over-target';
+            if(isFullDayMode && p.id !== fullDayProjectId) classes += ' disabled';
 
-            // ICONS & TEXT
-            let btnIcon = isRunning ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
-            let timeTxt = formatTime(totalMins);
+            // Text logic
+            let timeTxt = formatTime(currentProgress);
+            if (p.period !== 'day') {
+                let suffix = p.period === 'week' ? 'v' : (p.period === 'biweek' ? '2v' : 'mån');
+                timeTxt = `${formatTime(currentProgress)}/${formatTime(targetProgress)} ${suffix}`;
+            }
+            
+            if (isRunning) timeTxt = "REC...";
+            
             let pendingTxt = "";
+            if (isPaused && pendingMins > 0) pendingTxt = `+${pendingMins}m PÅGÅR`;
 
-            if(isRunning) {
-                timeTxt = "REC...";
-            } else if(isPaused && pendingMins > 0) {
-                pendingTxt = `+${pendingMins}m PÅGÅR`;
+            const streakHtml = streak > 0 ? `<span style="color:#ff9800; font-size:0.7rem;">🔥 ${streak}</span>` : '';
+            const lastDoneTxt = getLastDoneText(p.id, p.prio);
+
+            // Fullday Button for Prio 0
+            let extraBtn = '';
+            if (p.prio === 0) {
+                extraBtn = `<button class="btn-fullday" onclick="toggleFullDayMode('${p.id}', event)">
+                    ${isFullDayMode ? '🔓 Avsluta Heldag' : '🔒 Heldag-läge'}
+                </button>`;
             }
 
-            const streakHtml = streak > 0 ? `<span style="color:#ff9800; font-size:0.7rem; margin-left:5px;">🔥 ${streak}</span>` : '';
+            let btnIcon = isRunning ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
 
             const html = `
                 <div class="${classes}" id="card-${p.id}" 
@@ -545,93 +717,73 @@
                     <div class="card-top">
                         <div style="flex-grow:1">
                             <span class="task-title">${p.icon} ${p.title}</span>
-                            <div class="task-meta">Mål: ${p.target}m ${streakHtml}</div>
+                            <div class="task-meta">
+                                <div class="task-meta-row">
+                                    <span>Mål: ${p.target}m</span>
+                                    ${streakHtml}
+                                </div>
+                                <div class="task-meta-row" style="color:#666; font-size:0.7rem;">
+                                    ${lastDoneTxt}
+                                </div>
+                            </div>
                         </div>
                         <div class="control-group">
                             <div class="badge-container">
                                 <div class="timer-badge" id="badge-${p.id}">${timeTxt}</div>
                                 <div class="pending-text" id="pending-${p.id}">${pendingTxt}</div>
                             </div>
-                            
-                            <button class="btn-add" onclick="openAddTime('${p.id}', event)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-
+                            <button class="btn-add" onclick="openAddTime('${p.id}', event)"><i class="fas fa-plus"></i></button>
                             <button class="btn-stop" onclick="stopTask('${p.id}', event)"><i class="fas fa-stop"></i></button>
                             <button class="btn-main" onclick="toggleTask('${p.id}', event)">${btnIcon}</button>
                         </div>
                     </div>
                     <div class="card-progress-bg">
-                        <div class="card-progress-fill" style="width:${progressPct}%"></div>
+                        <div class="card-progress-fill" style="width:${Math.min(progressPct, 200)}%"></div>
                     </div>
+                    ${extraBtn}
                 </div>
             `;
             list.innerHTML += html;
         });
     }
 
-    // --- SUMMARY CARD ---
-    function renderSummary() {
+    function renderBudgets() {
         const d = getTodayData();
-        let total = 0, doneCount = 0;
+        let budgets = { 1: 0, 2: 0, 3: 0 };
         
+        // Prio 1-3
         projects.forEach(p => {
-            let m = d[p.id] || 0;
-            // Lägg till pågående sessions i totalen
-            if(sessions[p.id]) {
-                if(sessions[p.id].state === 'running') {
-                    const elapsed = Date.now() - sessions[p.id].startTime;
+            if (p.prio >= 1 && p.prio <= 3) {
+                let m = d[p.id] || 0;
+                if (sessions[p.id]) {
+                    const elapsed = sessions[p.id].state === 'running' ? (Date.now() - sessions[p.id].startTime) : 0;
                     m += Math.floor((sessions[p.id].accumulated + elapsed) / 60000);
-                } else {
-                    m += Math.floor(sessions[p.id].accumulated / 60000);
                 }
+                budgets[p.prio] += m;
             }
-            
-            total += m;
-            if(m >= p.target) doneCount++;
         });
 
-        document.getElementById('sum-time').innerText = formatTime(total);
-        document.getElementById('sum-tasks').innerText = `${doneCount}/${projects.length}`;
-        const eff = workGoal > 0 ? Math.round((total/workGoal)*100) : 0;
-        document.getElementById('sum-eff').innerText = `${eff}%`;
+        const updateBar = (id, val, max) => {
+            const pct = Math.min(100, (val/max)*100);
+            document.getElementById(id).style.width = pct + '%';
+            document.getElementById(id+'-text').innerText = formatTime(val) + '/' + formatTime(max);
+        };
+
+        updateBar('budget-p1', budgets[1], 360); // 6h
+        updateBar('budget-p2', budgets[2], 240); // 4h
+        updateBar('budget-p3', budgets[3], 240); // 4h
+
+        // Prio 0 (Video) - Weekly
+        const p0Mins = periodProgress['video_edit'] || 0;
+        let p0Pending = 0;
+        if (sessions['video_edit']) {
+             const elapsed = sessions['video_edit'].state === 'running' ? (Date.now() - sessions['video_edit'].startTime) : 0;
+             p0Pending = Math.floor((sessions['video_edit'].accumulated + elapsed) / 60000);
+        }
+        updateBar('budget-p0', p0Mins + p0Pending, 840); // 14h
     }
 
-    // --- RINGS ---
-    function updateRings() {
-        const h = new Date().getHours() + new Date().getMinutes()/60;
-        const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
-        setRing('ring-day', dayPct, '#666');
-
-        const d = getTodayData();
-        let total = 0;
-        projects.filter(p => p.prio <= 3).forEach(p => {
-            let m = d[p.id] || 0;
-            if(sessions[p.id]) {
-                if(sessions[p.id].state === 'running') {
-                    const elapsed = Date.now() - sessions[p.id].startTime;
-                    m += Math.floor((sessions[p.id].accumulated + elapsed) / 60000);
-                } else {
-                    m += Math.floor(sessions[p.id].accumulated / 60000);
-                }
-            }
-            total += m;
-        });
-        
-        const budgetPct = workGoal > 0 ? total/workGoal : 0;
-        const color = budgetPct >= 1 ? 'var(--gold)' : '#ff8800';
-        setRing('ring-budget', budgetPct, color);
-    }
-
-    function setRing(id, pct, color) {
-        const circle = document.getElementById(id);
-        const r = circle.r.baseVal.value;
-        const c = r * 2 * Math.PI;
-        circle.style.strokeDashoffset = c - (pct * c);
-        circle.style.stroke = color;
-    }
-
-    // --- MULTI-SESSION LOGIC ---
+    // --- TIMER ENGINE ---
     function toggleTask(id, e) {
         if(e) e.stopPropagation();
         vibrate(20);
@@ -639,66 +791,60 @@
         
         if (sessions[id]) {
             if (sessions[id].state === 'running') {
-                // PAUSA DETTA PROJEKT (Påverkar ej andra)
                 sessions[id].accumulated += (now - sessions[id].startTime);
                 sessions[id].state = 'paused';
                 sessions[id].startTime = null;
             } else if (sessions[id].state === 'paused') {
-                // FORTSÄTT DETTA PROJEKT
                 sessions[id].state = 'running';
                 sessions[id].startTime = now;
             }
         } else {
-            // NY SESSION
             sessions[id] = { accumulated: 0, state: 'running', startTime: now };
         }
-        
-        saveState();
-        render();
+        saveState(); render();
     }
 
     function stopTask(id, e) {
         if(e) e.stopPropagation();
         vibrate(40);
-        
         if(!sessions[id]) return;
         
-        // Räkna ut slutgiltig tid
-        let finalSession = 0;
-        if(sessions[id].state === 'running') {
-            finalSession = Date.now() - sessions[id].startTime;
-        }
+        let final = 0;
+        if(sessions[id].state === 'running') final = Date.now() - sessions[id].startTime;
+        const total = sessions[id].accumulated + final;
+        const mins = Math.floor(total / 60000);
         
-        const totalMs = sessions[id].accumulated + finalSession;
-        const mins = Math.floor(totalMs / 60000);
-        
-        // Commit om > 0
         if(mins > 0) commitTime(id, mins);
-        
-        // RADERA SESSIONEN
         delete sessions[id];
-        
-        saveState();
-        render();
+        saveState(); render();
     }
 
     function commitTime(id, mins) {
         const d = getTodayStr();
-        const oldTotal = history[d][id] || 0;
-        
         if(!history[d]) history[d] = {};
         if(!history[d][id]) history[d][id] = 0;
         history[d][id] += mins;
-        
-        // Confetti check
+
+        // V14 Updates
         const p = projects.find(x => x.id === id);
-        const newTotal = history[d][id];
-        if(oldTotal < p.target && newTotal >= p.target) {
+        
+        // 1. Last Done
+        lastDone[id] = d;
+        
+        // 2. Period Progress
+        if (p.period !== 'day') {
+            if(!periodProgress[id]) periodProgress[id] = 0;
+            periodProgress[id] += mins;
+        }
+
+        // Confetti logic (check period target or daily target)
+        let currentTotal = p.period === 'day' ? history[d][id] : periodProgress[id];
+        if ((currentTotal - mins) < p.target && currentTotal >= p.target) {
             setTimeout(triggerConfetti, 500);
             vibrate([100, 50, 100]);
         }
 
-        // UNDO STACK
+        // Undo
         undoStack.push({ date: d, id: id, mins: mins, timestamp: Date.now() });
         if(undoStack.length > MAX_UNDO) undoStack.shift();
 
@@ -706,225 +852,139 @@
         saveState();
     }
 
-    // --- SECURE LONG PRESS +5 ---
-    let pressTimer;
-    let pressStartX = 0, pressStartY = 0, hasMoved = false;
-
-    function startLongPress(id, e) {
-        if(e.touches) {
-            pressStartX = e.touches[0].clientX;
-            pressStartY = e.touches[0].clientY;
-        } else {
-            pressStartX = e.clientX;
-            pressStartY = e.clientY;
-        }
-        hasMoved = false;
-        
-        const card = document.getElementById(`card-${id}`);
-        card.classList.add('pressing');
-        
-        pressTimer = setTimeout(() => {
-            if(!hasMoved) {
-                vibrate(100);
-                commitTime(id, 5);
-                card.classList.remove('pressing'); 
-                showToast("⚡ +5 minuter tillagt!", true);
-                render();
-            }
-        }, 1200); // 1.2 sec
-    }
-    
-    function trackMovement(e) {
-        let curX, curY;
-        if(e.touches) {
-            curX = e.touches[0].clientX;
-            curY = e.touches[0].clientY;
-        } else {
-            curX = e.clientX;
-            curY = e.clientY;
-        }
-        if(Math.abs(curX - pressStartX) > 10 || Math.abs(curY - pressStartY) > 10) {
-            hasMoved = true;
-            cancelLongPress();
-        }
-    }
-    
-    function cancelLongPress() { 
-        clearTimeout(pressTimer);
-        document.querySelectorAll('.task-card').forEach(c => c.classList.remove('pressing'));
-    }
-
-    // --- UNDO SYSTEM ---
     function undoLast() {
         if(undoStack.length === 0) return;
-        
-        const action = undoStack.pop();
-        history[action.date][action.id] -= action.mins;
-        if(history[action.date][action.id] < 0) history[action.date][action.id] = 0;
-        
+        const act = undoStack.pop();
+        const p = projects.find(x => x.id === act.id);
+
+        // Reverse history
+        history[act.date][act.id] -= act.mins;
+        if(history[act.date][act.id] < 0) history[act.date][act.id] = 0;
+
+        // Reverse Period Progress
+        if(p.period !== 'day' && periodProgress[act.id]) {
+            periodProgress[act.id] -= act.mins;
+            if(periodProgress[act.id] < 0) periodProgress[act.id] = 0;
+        }
+
         saveState();
         document.getElementById('toast').classList.remove('show');
-        
-        // Uppdatera toast om fler finns
-        if(undoStack.length > 0) {
-            setTimeout(() => {
-                showToast(`Tid ångrad. ${undoStack.length} kvar.`, true);
-            }, 300);
-        }
-        
         render();
     }
-    
-    function confirmReset() {
-        if(confirm("⚠️ VARNING: Detta raderar ALL dagens data (committed och timers). Går INTE att ångra. Fortsätta?")) {
-            const d = getTodayStr();
-            if(history[d]) delete history[d];
-            sessions = {};
-            undoStack = [];
-            saveState();
-            render();
-            document.getElementById('modal-settings').style.display='none';
-            showToast("🔄 Dagen nollställd.", false);
-        }
+
+    // --- FULL DAY MODE ---
+    function toggleFullDayMode(id, e) {
+        if(e) e.stopPropagation();
+        isFullDayMode = !isFullDayMode;
+        fullDayProjectId = isFullDayMode ? id : null;
+        render();
+        if(isFullDayMode) showToast("🔥 HELDAG-LÄGE AKTIVERAT", false);
     }
 
-    // --- MANUAL TIME ADD SYSTEM (V13) ---
+    // --- MANUAL TIME ---
     let addTimeProjectId = null;
-
     function openAddTime(id, e) {
-        if(e) e.stopPropagation(); 
-        
+        if(e) e.stopPropagation();
         addTimeProjectId = id;
         const p = projects.find(x => x.id === id);
-        
         document.getElementById('add-project-title').innerText = `${p.icon} ${p.title}`;
         document.getElementById('custom-time-slider').value = 45;
         document.getElementById('custom-time-display').innerText = '45 min';
         document.getElementById('modal-addtime').style.display = 'flex';
     }
-
-    function closeAddTime() {
-        document.getElementById('modal-addtime').style.display = 'none';
-        addTimeProjectId = null;
-    }
-
+    function closeAddTime() { document.getElementById('modal-addtime').style.display = 'none'; addTimeProjectId = null; }
     function quickAddTime(mins) {
         if(!addTimeProjectId) return;
-        
         vibrate(30);
         commitTime(addTimeProjectId, parseInt(mins));
-        
         closeAddTime();
         render();
-        
         showToast(`⏱️ +${mins}m tillagd manuellt`, true);
+    }
+
+    // --- LONG PRESS ---
+    let pressTimer, startX, startY, moved;
+    function startLongPress(id, e) {
+        if(e.touches) { startX = e.touches[0].clientX; startY = e.touches[0].clientY; } 
+        else { startX = e.clientX; startY = e.clientY; }
+        moved = false;
+        const card = document.getElementById(`card-${id}`);
+        card.classList.add('pressing');
+        pressTimer = setTimeout(() => {
+            if(!moved) {
+                vibrate(100);
+                commitTime(id, 5);
+                card.classList.remove('pressing');
+                showToast("⚡ +5 minuter tillagt!", true);
+                render();
+            }
+        }, 1200);
+    }
+    function cancelLongPress() { 
+        clearTimeout(pressTimer);
+        document.querySelectorAll('.task-card').forEach(c => c.classList.remove('pressing'));
     }
 
     // --- LIVE LOOP ---
     setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        
-        // Uppdatera alla RUNNING sessions
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         Object.keys(sessions).forEach(id => {
             if(sessions[id].state === 'running') {
                 const ms = sessions[id].accumulated + (Date.now() - sessions[id].startTime);
                 const totalSec = Math.floor(ms/1000);
                 const txt = `${Math.floor(totalSec/60)}:${String(totalSec%60).padStart(2,'0')}`;
-                
-                const badge = document.getElementById(`badge-${id}`);
-                if(badge) badge.innerText = txt;
+                const el = document.getElementById(`badge-${id}`);
+                if(el) el.innerText = txt;
             }
         });
+        renderBudgets(); // Update bars live
     }, 1000);
 
-    // --- STANDARD FUNCTIONS (Stats, Settings, Utils) ---
-    
-    function updateGoal(val) {
-        workGoal = parseInt(val);
-        document.getElementById('goal-display').innerText = formatTime(workGoal);
-        saveState();
-        renderSummary();
-        updateRings();
-    }
-    
-    function openSettings() {
-        document.getElementById('modal-settings').style.display='flex';
-        document.getElementById('goal-slider').value = workGoal;
-        document.getElementById('goal-display').innerText = formatTime(workGoal);
+    // --- STANDARD UTILS ---
+    function renderSummary() {
+        const d = getTodayData();
+        let total = 0, doneCount = 0;
+        projects.forEach(p => {
+            let m = d[p.id] || 0;
+            if(sessions[p.id]) {
+                const el = sessions[p.id].state === 'running' ? (Date.now()-sessions[p.id].startTime) : 0;
+                m += Math.floor((sessions[p.id].accumulated + el)/60000);
+            }
+            total += m;
+            // Check targets based on period progress for non-daily tasks
+            const prog = p.period === 'day' ? m : (periodProgress[p.id] || 0) + (p.period !== 'day' && sessions[p.id] ? Math.floor((sessions[p.id].accumulated + (sessions[p.id].state==='running'?(Date.now()-sessions[p.id].startTime):0))/60000) : 0);
+            if(prog >= p.target) doneCount++;
+        });
+        document.getElementById('sum-time').innerText = formatTime(total);
+        document.getElementById('sum-tasks').innerText = `${doneCount}/${projects.length}`;
+        const eff = workGoal > 0 ? Math.round((total/workGoal)*100) : 0;
+        document.getElementById('sum-eff').innerText = `${eff}%`;
     }
 
-    function showToast(msg, allowUndo) {
-        const t = document.getElementById('toast');
-        t.querySelector('.toast-msg').innerHTML = msg;
-        const uBtn = document.getElementById('toast-undo-btn');
+    function updateRings() {
+        const h = new Date().getHours() + new Date().getMinutes()/60;
+        const dayPct = Math.max(0, Math.min(1, (h - WAKE_TIME)/(SLEEP_TIME - WAKE_TIME)));
+        setRing('ring-day', dayPct, '#666');
         
-        if(allowUndo) {
-            uBtn.style.display = 'block';
-            uBtn.innerText = undoStack.length > 0 ? `ÅNGRA (${undoStack.length})` : 'ÅNGRA';
-        } else {
-            uBtn.style.display = 'none';
-        }
-
-        t.classList.add('show');
-        setTimeout(()=>t.classList.remove('show'), 4000);
+        const d = getTodayData();
+        let total = 0;
+        projects.filter(p => p.prio <= 3).forEach(p => {
+            let m = d[p.id] || 0;
+            if(sessions[p.id]) {
+                const el = sessions[p.id].state === 'running' ? (Date.now()-sessions[p.id].startTime) : 0;
+                m += Math.floor((sessions[p.id].accumulated + el)/60000);
+            }
+            total += m;
+        });
+        const budgetPct = workGoal > 0 ? total/workGoal : 0;
+        setRing('ring-budget', budgetPct, budgetPct >= 1 ? 'var(--gold)' : '#ff8800');
     }
 
-    function renderStats() {
-        const cont = document.getElementById('week-chart');
-        cont.innerHTML = '';
-        const days = ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'];
-        let max = 1;
-        let weekData = [];
-        let dist = {1:0, 2:0, 3:0, 4:0};
-
-        for(let i=6; i>=0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            const ds = d.toISOString().split('T')[0];
-            const data = history[ds] || {};
-            let daySum = 0;
-            Object.keys(data).forEach(pid => {
-                const m = data[pid];
-                daySum += m;
-                const p = projects.find(x=>x.id===pid);
-                if(p) dist[p.prio > 3 ? 4 : p.prio] += m;
-            });
-            if(daySum > max) max = daySum;
-            weekData.push({ day: days[d.getDay()], val: daySum });
-        }
-
-        weekData.forEach(d => {
-            const h = (d.val / max) * 100;
-            const bg = d.val > 480 ? '#4caf50' : '#444';
-            cont.innerHTML += `
-                <div class="chart-col">
-                    <div class="chart-bar" style="height:${h}%; background:${bg}"></div>
-                    <span class="chart-day">${d.day}</span>
-                </div>`;
-        });
-
-        const distCont = document.getElementById('prio-breakdown');
-        distCont.innerHTML = '';
-        const totalW = Object.values(dist).reduce((a,b)=>a+b,0);
-        const configs = [
-            { id:1, label:'Tung (P1)', grad:'var(--p1-grad)' },
-            { id:2, label:'Balans (P2)', grad:'var(--p2-grad)' },
-            { id:3, label:'Grund (P3)', grad:'var(--p3-grad)' },
-            { id:4, label:'Framtid', grad:'var(--p46-grad)' }
-        ];
-
-        configs.forEach(c => {
-            const val = dist[c.id];
-            const pct = totalW > 0 ? Math.round((val/totalW)*100) : 0;
-            distCont.innerHTML += `
-                <div class="dist-bar">
-                    <div class="dist-label">${c.label}</div>
-                    <div class="dist-track">
-                        <div class="dist-fill" style="width:${pct}%; background:${c.grad}">${pct > 10 ? formatTime(val) : ''}</div>
-                    </div>
-                    <div style="font-size:0.75rem; font-weight:bold; width:35px;">${pct}%</div>
-                </div>`;
-        });
+    function setRing(id, pct, color) {
+        const c = document.getElementById(id);
+        const offset = (c.r.baseVal.value * 2 * Math.PI) * (1 - pct);
+        c.style.strokeDashoffset = offset;
+        c.style.stroke = color;
     }
 
     function formatTime(m) { return m >= 60 ? (m/60).toFixed(1) + 'h' : m + 'm'; }
@@ -944,40 +1004,75 @@
         btn.classList.add('active');
         if(v==='stats') renderStats();
     }
-    
-    function triggerConfetti() {
-        const c = document.getElementById('confetti');
-        const ctx = c.getContext('2d');
-        c.width = window.innerWidth; c.height = window.innerHeight;
-        let p = [];
-        for(let i=0; i<100; i++) p.push({ x: c.width/2, y: c.height/2, vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20, color: `hsl(${Math.random()*360},100%,50%)`, life: 100 });
-        function step() {
-            ctx.clearRect(0,0,c.width,c.height);
-            p.forEach((k,i)=>{ k.x+=k.vx; k.y+=k.vy; k.vy+=0.5; k.life--; ctx.fillStyle=k.color; ctx.fillRect(k.x,k.y,5,5); if(k.life<0)p.splice(i,1); });
-            if(p.length) requestAnimationFrame(step);
+
+    function renderStats() {
+        const cont = document.getElementById('week-chart'); cont.innerHTML = '';
+        const days = ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'];
+        let max = 1, weekData = [], dist = {1:0, 2:0, 3:0, 4:0};
+        for(let i=6; i>=0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const ds = d.toISOString().split('T')[0];
+            const data = history[ds] || {};
+            let daySum = 0;
+            Object.keys(data).forEach(pid => {
+                const m = data[pid]; daySum += m;
+                const p = projects.find(x=>x.id===pid);
+                if(p) dist[p.prio > 3 ? 4 : p.prio] += m;
+            });
+            if(daySum > max) max = daySum;
+            weekData.push({ day: days[d.getDay()], val: daySum });
         }
+        weekData.forEach(d => {
+            const h = (d.val/max)*100;
+            cont.innerHTML += `<div class="chart-col"><div class="chart-bar" style="height:${h}%; background:${d.val>480?'#4caf50':'#444'}"></div><span class="chart-day">${d.day}</span></div>`;
+        });
+        const dCont = document.getElementById('prio-breakdown'); dCont.innerHTML = '';
+        const totalW = Object.values(dist).reduce((a,b)=>a+b,0);
+        const conf = [{id:1,l:'Tung',g:'var(--p1-grad)'},{id:2,l:'Balans',g:'var(--p2-grad)'},{id:3,l:'Grund',g:'var(--p3-grad)'},{id:4,l:'Övrigt',g:'var(--p46-grad)'}];
+        conf.forEach(c => {
+            const val = dist[c.id], pct = totalW>0 ? Math.round((val/totalW)*100) : 0;
+            dCont.innerHTML += `<div class="dist-bar"><div class="dist-label">${c.l}</div><div class="dist-track"><div class="dist-fill" style="width:${pct}%; background:${c.g}">${pct>10?formatTime(val):''}</div></div><div style="font-size:0.75rem; width:35px;">${pct}%</div></div>`;
+        });
+    }
+
+    function confirmReset() {
+        if(confirm("⚠️ VARNING: Nollställ allt idag?")) {
+            const d = getTodayStr(); if(history[d]) delete history[d];
+            sessions = {}; undoStack = []; saveState(); render();
+            document.getElementById('modal-settings').style.display='none';
+            showToast("Dagen nollställd", false);
+        }
+    }
+
+    function triggerConfetti() {
+        const c = document.getElementById('confetti'); const ctx = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight;
+        let p = []; for(let i=0; i<100; i++) p.push({x:c.width/2,y:c.height/2,vx:(Math.random()-0.5)*20,vy:(Math.random()-0.5)*20,color:`hsl(${Math.random()*360},100%,50%)`,life:100});
+        function step() { ctx.clearRect(0,0,c.width,c.height); p.forEach((k,i)=>{k.x+=k.vx;k.y+=k.vy;k.vy+=0.5;k.life--;ctx.fillStyle=k.color;ctx.fillRect(k.x,k.y,5,5);if(k.life<0)p.splice(i,1)}); if(p.length) requestAnimationFrame(step); }
         step();
     }
-    
+
     function exportData() {
         const a = document.createElement('a');
-        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({history, sessions, undoStack}));
-        a.download = "khalifa_backup.json";
-        a.click();
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({history, sessions, undoStack, periodProgress, lastDone}));
+        a.download = "khalifa_backup.json"; a.click();
     }
     function importData(inp) {
         const r = new FileReader();
-        r.onload = e => { 
-            const d = JSON.parse(e.target.result);
-            if(d.history) history = d.history;
-            if(d.sessions) sessions = d.sessions;
-            if(d.undoStack) undoStack = d.undoStack;
-            saveState(); alert("Klart!"); render(); 
-        };
+        r.onload = e => { const d = JSON.parse(e.target.result); if(d.history) history=d.history; if(d.sessions) sessions=d.sessions; if(d.periodProgress) periodProgress=d.periodProgress; if(d.lastDone) lastDone=d.lastDone; saveState(); alert("Klart!"); render(); };
         r.readAsText(inp.files[0]);
+    }
+    
+    function updateGoal(v) { workGoal=parseInt(v); document.getElementById('goal-display').innerText=formatTime(workGoal); saveState(); render(); }
+    function openSettings() { document.getElementById('modal-settings').style.display='flex'; document.getElementById('goal-slider').value=workGoal; document.getElementById('goal-display').innerText=formatTime(workGoal); }
+    function showToast(msg, allowUndo) { 
+        const t = document.getElementById('toast'); t.querySelector('.toast-msg').innerHTML=msg; 
+        document.getElementById('toast-undo-btn').style.display = allowUndo ? 'block' : 'none';
+        t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4000); 
     }
 
     // INIT
+    checkPeriodResets();
     render();
 </script>
 </body>
